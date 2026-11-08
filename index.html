@@ -294,6 +294,7 @@ textarea{font:inherit;width:100%;padding:10px;border:1px solid #e6d2a8;border-ra
 <script>
 /***************************************************************
  * 벳공도전_hj 앱 화면 — 혼자 쓰는 베트남어 회화 공부 (영공도전_jw v2.9 화면을 바탕으로 만듦)
+ * VERSION 1.1   [v1.1] 서버 주소 칸에 앱 링크 전체(…/vg/#s=…)를 넣어도 서버 주소만 뽑아 연결
  * VERSION 1.0   [v1.0] 처음 만듦
  *   - 🥭 망고 색·망고 게임, 회화 7편(첫걸음·일상·식당·친구·쇼핑·길교통·여행호텔) + 전체 섞기
  *   - 편마다 레벨 3개(쉬움·보통·어려움) × 단계 3개, 잠금 없음(아무 데나 눌러 바로 공부)
@@ -306,7 +307,7 @@ textarea{font:inherit;width:100%;padding:10px;border:1px solid #e6d2a8;border-ra
  ***************************************************************/
 
 // ===================== 조절할 값 =====================
-const VERSION = '1.0';            // 앱 화면 버전 [v1.0]
+const VERSION = '1.1';            // 앱 화면 버전 [v1.1]
 const SPEECH_LANG = 'vi-VN';      // [v1.0] 읽어 주기·음성인식 언어
 const PCT_TOAST_MS = 1600;        // 답할 때 진행률 ▲▼ 보여 주는 시간(ms)
 const LONG_TEXT = 'Xin chào mọi người. Tôi tên là Hyunjin, và tôi học tiếng Việt mỗi ngày. Sau giờ học, tôi thích đọc sách và uống cà phê với bạn bè.';   // 점검 화면 긴 문장 (속도 확인용)
@@ -705,7 +706,11 @@ async function boot(){
   }
 }
 function saveServer(){
-  const v = document.getElementById('serverIn').value.trim();
+  let v = document.getElementById('serverIn').value.trim();
+  // [v1.1] 앱 링크 전체를 넣어도 됨: s= 뒤 서버 주소만 뽑기 (%로 바뀐 글자도 풀기)
+  try{ v = decodeURIComponent(v); }catch(e){}
+  const m = v.match(/[#?&]s=(https:\/\/script\.google\.com\/[^\s&#]*?\/exec)/);
+  if(m) v = m[1];
   if(!/^https:\/\/script\.google\.com\/.+\/exec/.test(v)){ document.getElementById('setupMsg').textContent='…/exec 로 끝나는 주소를 넣어 주세요.'; return; }
   sset('bg_server', v); location.reload();
 }
