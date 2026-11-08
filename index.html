@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="color-scheme" content="light dark"><!-- [v1.0] 삼성 인터넷 억지 다크 대응 / 폰 다크 모드가 앱을 억지로 어둡게 바꾸지 않게 -->
+<title>🥭 벳공도전</title>
+<link rel="icon" id="favIcon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🥭%3C/text%3E%3C/svg%3E">
+<style>
+/* [v1.0] 망고 색: 주황·노랑 */
+:root{color-scheme:light;--ink:#3a2a12;--sub:#8a7254;--line:#f0e2c4;--bg:#fff8e6;--card:#fff;--pri:#ff8a00;--ok:#22b35e;--bad:#ff4d4f;--warn:#ffb020;--blue:#d9730d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Segoe UI",sans-serif;color:var(--ink);background:var(--bg)}
+button{font:inherit;border:0;cursor:pointer;color:inherit}
+input,select{font:inherit;width:100%;padding:12px;border:1px solid #e6d2a8;border-radius:12px;margin-top:6px;background:#fff;color:var(--ink)}
+.scr{display:none;min-height:100%;padding:16px 16px 40px}
+.scr.on{display:block}
+h1{font-size:22px;margin:4px 0 12px}
+h2{font-size:18px;margin:16px 0 8px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.row{display:flex;gap:8px;align-items:center}
+.row>*{flex:1}
+.chip{background:#fff;border-radius:20px;padding:6px 12px;font-size:14px;box-shadow:0 1px 4px #0001;white-space:nowrap;display:inline-block}
+.card{background:var(--card);border-radius:16px;padding:14px;margin:10px 0;box-shadow:0 2px 8px #7a4b0014}
+.btn{display:block;width:100%;padding:14px;border-radius:14px;background:var(--pri);color:#fff;font-size:17px;font-weight:700;margin-top:10px}
+.btn.gray{background:#f1e6cd;color:var(--ink)}
+.btn.green{background:var(--ok)}
+.btn.blue{background:#e0a100}
+.btn.small{padding:9px;font-size:14px;margin-top:6px}
+.btn:disabled{opacity:.45}
+.muted{color:var(--sub);font-size:13px}
+.bar{height:10px;background:#f1e6cd;border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .4s}
+#nav{position:fixed;left:0;right:0;bottom:0;display:none;background:#fff;border-top:1px solid var(--line);z-index:15;padding-bottom:env(safe-area-inset-bottom)}
+#nav.on{display:flex}
+#nav button{flex:1;background:none;padding:8px 0 10px;font-size:12px;color:var(--sub)}
+#nav button b{display:block;font-size:22px}
+#nav button.on{color:var(--pri);font-weight:700}
+#main{padding-bottom:90px}
+.tab{display:none}.tab.on{display:block}
+/* 레벨·단계 카드 */
+.lvcard.focus{outline:3px solid #ffd27a}
+.doneTag{color:var(--ok);font-weight:800;font-size:14px}
+.stg{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:9px 6px;border-top:1px solid #f5ead2;font-size:15px;cursor:pointer;border-radius:10px}
+.stg.focus{background:#fff3d1}
+.pbar{flex:1 1 100%;display:flex;align-items:center;gap:8px;margin-top:5px}
+.pbar .bar{flex:1;height:8px}
+.pbar .bar i{background:linear-gradient(90deg,#ffc83d,#22b35e)}
+.pbar b{font-size:13px;min-width:40px;text-align:right}
+/* 문제 화면 */
+#quiz{padding-top:10px}
+.qhead{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.qhead .bar{flex:1}
+.qx{background:#f6ecd6;border-radius:10px;width:38px;height:38px;font-size:18px}
+.qbox{background:#fff;border-radius:18px;padding:22px 14px;text-align:center;box-shadow:0 2px 8px #7a4b0014;min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.qkind{font-size:13px;color:var(--sub)}
+.qbig{font-size:32px;font-weight:800;word-break:keep-all;line-height:1.3}
+.qmid{font-size:20px;font-weight:700;line-height:1.5;word-break:keep-all}
+.qsay{background:#fff1d6;border-radius:16px;padding:12px 22px;font-size:28px}
+.opts button{display:block;width:100%;text-align:left;background:#fff;border:2px solid #f0dfba;border-radius:14px;padding:15px;font-size:18px;margin:8px 0}
+.opts button.right{border-color:var(--ok);background:var(--ok);color:#fff;font-weight:700}
+.opts button.right::after{content:'  ⭕'}
+.opts button.wrong{border-color:var(--bad);background:var(--bad);color:#fff;font-weight:700;animation:shake .35s}
+.opts button.wrong::after{content:'  ❌'}
+button{transition:transform .08s, filter .08s}
+button:active:not(:disabled){transform:scale(.96);filter:brightness(.9)}
+.dunno{display:block;width:100%;background:#fff;color:var(--sub);font-size:16px;padding:13px;margin-top:4px;border:2px dashed #e6d2a8;border-radius:14px}
+#loader{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:58;background:#ffffff55}
+#loader.on{display:flex}
+#loader b{background:#3a2a12;color:#fff;padding:12px 20px;border-radius:16px;font-size:15px}
+#qScore{font-weight:700;font-size:14px;white-space:nowrap}
+.ph{color:#b9690a;font-size:17px;margin-top:4px}
+.replay{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.replay button{flex:1 1 40%;padding:9px;border-radius:12px;background:#fff1d6;color:var(--blue);font-weight:700;font-size:14px}
+.xrow{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #f5ead2}
+.xrow:last-child{border:0}
+.xrow .g{flex:0 0 64px;font-size:22px;font-weight:800;color:var(--pri);text-align:center}
+.xrow .m{flex:1;font-size:14px;line-height:1.4}
+.xrow .m .ex{font-weight:700;font-size:15px;color:var(--ink)}
+.xrow .b{display:flex;gap:4px}
+.xrow .b button{width:40px;height:40px;border-radius:12px;background:#fff1d6;font-size:18px}
+.xrow .res{font-size:13px;margin-top:2px}
+.xtabs{display:flex;gap:6px;margin:8px 0}
+.xtabs button{flex:1;padding:10px 4px;border-radius:12px;background:#f6ecd6;font-weight:700;font-size:14px}
+.xtabs button.on{background:var(--pri);color:#fff}
+#qPct{position:fixed;left:50%;top:64px;transform:translateX(-50%);background:#3a2a12f0;color:#fff;padding:8px 14px;border-radius:20px;font-weight:700;font-size:14px;z-index:30;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+#qPct.on{opacity:1}
+.myform input{margin-top:6px}
+.myform .row input{margin-top:0}
+textarea{font:inherit;width:100%;padding:10px;border:1px solid #e6d2a8;border-radius:12px;margin-top:6px;min-height:110px;background:#fff;color:var(--ink)}
+.pin{font-size:18px}
+/* 점검 */
+.meter{height:22px;background:#f1e6cd;border-radius:11px;overflow:hidden;margin:8px 0}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22b35e,#ffb020,#ff4d4f);transition:width .08s}
+.kv{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid #f5ead2;font-size:14px}
+.kv:last-child{border:0}
+.kv b{white-space:nowrap}
+.heardBox{min-height:28px;font-size:18px;font-weight:700;color:var(--blue);margin-top:4px}
+.chkline{font-size:13px;color:var(--sub);white-space:pre-wrap;line-height:1.5;margin-top:6px}
+.fb{border-radius:16px;padding:14px;margin-top:10px;background:#fff;box-shadow:0 2px 8px #7a4b0014}
+.fb.good{border-left:6px solid var(--ok)}
+.fb.bad{border-left:6px solid var(--bad)}
+.tbar{height:8px;background:#f1e6cd;border-radius:6px;overflow:hidden;margin:6px 0 0}
+.tbar i{display:block;height:100%;background:var(--warn);width:100%}
+/* 문장 배열 */
+.slot{min-height:64px;border-bottom:2px dashed #e6d2a8;display:flex;flex-wrap:wrap;gap:6px;padding:8px 0;justify-content:center;width:100%}
+.pool{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+.tok{background:#fff;border:2px solid #ecd9ae;border-radius:12px;padding:9px 12px;font-size:18px;font-weight:600}
+.slot .tok{background:#fff1d6;border-color:#ffd08a}
+.tok.used{visibility:hidden}
+/* 말하기 */
+.micbig{width:120px;height:120px;border-radius:50%;background:var(--pri);color:#fff;font-size:46px;margin-top:6px;box-shadow:0 6px 16px #ff8a0055}
+.micbig.listen{background:var(--warn);animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.06)}}
+/* 단어장 */
+.word{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid #f5ead2}
+.word .e{font-size:24px;width:32px;text-align:center}
+.word .en{font-weight:700;font-size:17px}
+.word .ko{color:var(--sub);font-size:14px}
+.word .r{margin-left:auto;display:flex;gap:6px;align-items:center}
+.word .r button{background:#fff1d6;border-radius:10px;padding:7px 9px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.chips button{background:#fff;border-radius:18px;padding:7px 12px;font-size:14px;white-space:nowrap;box-shadow:0 1px 3px #0001}
+.chips button.on{background:var(--pri);color:#fff}
+/* 망고 게임 */
+#game{padding:0;background:linear-gradient(#7ec8ff,#d9f1ff);height:100%;overflow:hidden;position:relative}
+#hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:12px 14px;font-weight:700;z-index:3}
+#hud span{background:#ffffffcc;border-radius:14px;padding:5px 10px;font-size:14px}
+#field{position:absolute;top:0;left:0;right:0;bottom:220px}
+#ground{position:absolute;left:0;right:0;bottom:220px;height:14px;background:#5cc96b;border-top:3px solid #3fa94f}
+.mango{position:absolute;top:0;width:130px;margin-left:-65px;text-align:center;will-change:transform}
+.mango .fruit{font-size:58px;line-height:1;filter:drop-shadow(0 4px 3px #0002)}
+.mango .tag{display:inline-block;background:#fff;border-radius:10px;padding:3px 8px;font-size:15px;font-weight:700;margin-top:2px}
+.mango.pop{transition:transform .25s,opacity .25s;opacity:0}
+#pad{position:absolute;left:0;right:0;bottom:0;height:220px;background:#fffffff2;padding:12px;z-index:3}
+#gChoices{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+#gChoices button{background:#fff3e6;border:2px solid #ffd2a6;border-radius:14px;padding:10px 4px;font-size:15px;line-height:1.25;font-weight:700;min-height:62px;word-break:keep-all}
+#padRow{display:flex;gap:8px;margin-top:10px}
+#gMic{flex:3;background:var(--pri);color:#fff;border-radius:16px;padding:16px;font-size:18px;font-weight:700}
+#gMic.listen{background:var(--warn)}
+#gSay,#gQuit{flex:1;background:#fff1d6;border-radius:16px;font-size:20px}
+#gFlash{position:absolute;top:40%;left:0;right:0;text-align:center;font-size:28px;font-weight:800;z-index:4;pointer-events:none;text-shadow:0 2px 0 #fff;padding:0 10px}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+/* 팝업 */
+#toast{position:fixed;left:50%;top:14px;transform:translate(-50%,-140px);background:#3a2a12;color:#fff;padding:12px 18px;border-radius:16px;font-size:15px;z-index:60;transition:transform .35s;max-width:90%;text-align:center}
+#toast.on{transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal.on{display:flex}
+.mbox{background:#fff;border-radius:22px;padding:20px;text-align:center;width:100%;max-width:420px;max-height:92vh;overflow:auto}
+.confetti{position:fixed;top:-20px;font-size:22px;z-index:70;pointer-events:none;animation:fall 2.2s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+</style>
+</head>
+<body>
+
+<!-- 처음 연결 -->
+<div class="scr" id="setup">
+  <h1>🥭 벳공도전</h1>
+  <div class="card">
+    <b>서버 주소 넣기 (처음 한 번만)</b>
+    <p class="muted">보내 준 앱 링크로 열면 자동으로 넣어져요.</p>
+    <input id="serverIn" placeholder="https://script.google.com/macros/s/…/exec">
+    <button class="btn" onclick="saveServer()">연결하기</button>
+    <p class="muted" id="setupMsg"></p>
+  </div>
+</div>
+
+<!-- 메인 (탭 4개) -->
+<div class="scr" id="main">
+
+  <!-- 📚 공부 -->
+  <div class="tab" id="tabStudy">
+    <div class="top">
+      <h1 style="margin:0">🥭 벳공도전</h1>
+      <div class="row" style="flex:0 0 auto;gap:6px">
+        <button class="chip spdBtn" onclick="cycleSpeed()" style="white-space:nowrap">🐢</button>
+        <button class="chip" onclick="openSettings()">⚙️</button>
+        <span class="chip" id="streakChip">🔥 0</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="top"><b>오늘의 학습</b><span class="muted" id="todayTxt"></span></div>
+      <div class="bar" style="margin-top:8px"><i id="todayBar"></i></div>
+      <p class="muted" id="focusTxt" style="margin:8px 0 0"></p>
+      <button class="btn" id="studyBtn" onclick="startStudy(false)">학습 시작</button>
+      <div class="row" style="margin-top:4px">
+        <button class="btn gray small" onclick="goWrongNote()">📒 오답노트</button>
+        <button class="btn gray small" onclick="openSettings()">⚙️ 설정 (공부량·편)</button>
+      </div>
+    </div>
+    <div class="top" style="margin-top:14px"><b id="modeTitle"></b><button class="chip" onclick="openSettings()">편 바꾸기</button></div>
+    <p class="muted" style="margin:4px 0 0">아무 레벨·단계나 눌러서 바로 공부해요. 잠긴 곳은 없어요.</p>
+    <div id="levelCards"></div>
+    <p class="muted" style="text-align:center" id="verLine"></p>
+  </div>
+
+  <!-- 🎮 게임 -->
+  <div class="tab" id="tabGame">
+    <h1>🎮 망고 게임</h1>
+    <div class="card">
+      <p style="font-size:16px;line-height:1.6">🥭 <b>오늘 공부한 단어</b>가 망고에 달려 떨어져요.<br>맞는 베트남어 버튼을 누르거나 🎤 로 말하면 성공! (오늘 틀린 단어는 더 자주 나와요)</p>
+      <p class="muted" id="gameInfo"></p>
+      <button class="btn" id="gameBtn" onclick="startGame()">게임 시작</button>
+      <button class="btn blue" onclick="startGame('my')">📌 내 단어장으로 게임</button>
+    </div>
+  </div>
+
+  <!-- 📒 단어장 -->
+  <div class="tab" id="tabWords">
+    <div class="row" style="justify-content:space-between;align-items:center"><h1 style="margin:0">📒 단어장</h1><button class="chip spdBtn" onclick="cycleSpeed()" style="flex:0 0 auto;white-space:nowrap">🐢</button></div>
+    <div class="chips" id="wordChips"></div>
+    <p class="muted" id="wordHelp"></p>
+    <div class="card" id="wordList"></div>
+  </div>
+
+  <!-- 📚 부록 -->
+  <div class="tab" id="tabExtra">
+    <div class="row" style="justify-content:space-between;align-items:center"><h1 style="margin:0">📚 부록</h1><button class="chip spdBtn" onclick="cycleSpeed()" style="flex:0 0 auto;white-space:nowrap">🐢</button></div>
+    <div class="xtabs" id="xTabs"></div>
+    <p class="muted" id="xHelp"></p>
+    <div class="card" id="xList"></div>
+  </div>
+</div>
+
+<!-- 문제 화면 (공부·레벨 테스트 같이 씀) -->
+<div class="scr" id="quiz">
+  <div class="qhead"><button class="qx" onclick="quitQuiz()">✕</button><div class="bar"><i id="qBar"></i></div><span id="qScore"></span><button class="chip spdBtn" onclick="cycleSpeed()" style="padding:4px 8px;white-space:nowrap">🐢</button><span class="muted" id="qCount"></span></div>
+  <div class="tbar" id="qTimerWrap" style="display:none"><i id="qTimer"></i></div>
+  <div id="qArea"></div>
+</div>
+
+<!-- 망고 게임 -->
+<div class="scr" id="game">
+  <div id="hud"><span id="hudLife">❤️❤️❤️</span><span id="hudProg">1/15</span><span id="hudScore">0점</span><button class="chip spdBtn" onclick="cycleSpeed()" style="padding:2px 8px;white-space:nowrap">🐢</button></div>
+  <div id="field"></div>
+  <div id="gFlash"></div>
+  <div id="ground"></div>
+  <div id="pad">
+    <div id="gChoices"></div>
+    <div id="padRow">
+      <button id="gSay" onclick="gHint()">🔊</button>
+      <button id="gMic" onclick="gMicTap()">🎤 말하기</button>
+      <button id="gQuit" onclick="quitGame()">✕</button>
+    </div>
+    <p class="muted" id="gNote" style="margin:6px 0 0;text-align:center"></p>
+  </div>
+</div>
+
+<!-- 🩺 점검 화면 (문제 찾기) -->
+<div class="scr" id="check">
+  <div class="top"><h1>🩺 점검 (문제 찾기)</h1><button class="chip spdBtn" onclick="cycleSpeed()" style="white-space:nowrap">🐢</button><button class="chip" onclick="closeCheck()">← 돌아가기</button></div>
+  <p class="muted">여기서 한 시험 결과는 자동으로 서버에 최근 기록으로 남아요.</p>
+  <div class="card"><b>📱 기기 정보</b><div id="ckInfo" style="margin-top:6px"></div></div>
+  <div class="card"><b>🔊 베트남어 목소리</b>
+    <p class="muted">목소리를 고르고 ▶ 로 들어 보세요. 고른 목소리로 앱 전체가 읽어 줘요.</p>
+    <select id="ckVoice" onchange="pickUserVoice()"></select>
+    <p class="muted" style="margin:8px 0 4px">읽기 속도</p><div class="spdBox" id="ckSpd"></div>
+    <div class="row"><button class="btn small" onclick="testSay('xin chào')">▶ xin chào</button><button class="btn small" onclick="testSay('cảm ơn')">▶ cảm ơn</button><button class="btn small" onclick="testSay('Tôi muốn gọi món này.')">▶ 문장</button></div>
+    <button class="btn small blue" onclick="testSay(LONG_TEXT)">📖 긴 문장 읽기 (속도 확인)</button>
+    <p class="muted">위쪽 🐢 속도 버튼을 바꿔 가며 들어 보면 속도가 바뀌는지 바로 알 수 있어요.</p>
+  </div>
+  <div class="card"><b>🎚 마이크 소리 크기</b>
+    <p class="muted">시작을 누르고 <span id="ckSec"></span>초 동안 "씬 짜오" 하고 말해 보세요. 막대가 움직이면 마이크에 소리가 들어오는 거예요.</p>
+    <div class="meter"><i id="ckMeter"></i></div>
+    <div class="row"><button class="btn small blue" id="ckMicBtn" onclick="micLevelTest()">시작</button><span id="ckMicTxt" class="muted"></span></div>
+  </div>
+  <div class="card"><b>🎤 음성 인식 시험</b>
+    <p class="muted">말하기를 누르고 <b>xin chào</b> 라고 말해 보세요. 들리는 대로 글자가 바로 떠요.</p>
+    <div class="heardBox" id="ckHeard">—</div>
+    <button class="btn small" id="ckRecBtn" onclick="recogTest()">🎤 말하기</button>
+    <div class="chkline" id="ckRecLog"></div>
+  </div>
+  <div class="card"><b>🌐 서버 속도</b>
+    <div class="row"><button class="btn small gray" onclick="serverSpeedTest()">재기</button><span id="ckSrv" class="muted"></span></div>
+  </div>
+  <button class="btn green" onclick="sendCheck()">📤 점검 결과 보내기</button>
+  <p class="muted" style="text-align:center">앱 v<span id="ckVer"></span></p>
+</div>
+
+<!-- 아래 탭 -->
+<div id="nav">
+  <button data-t="tabStudy" onclick="showTab('tabStudy')"><b>📚</b>공부</button>
+  <button data-t="tabGame" onclick="showTab('tabGame')"><b>🎮</b>게임</button>
+  <button data-t="tabWords" onclick="showTab('tabWords')"><b>📒</b>단어장</button>
+  <button data-t="tabExtra" onclick="showTab('tabExtra')"><b>📖</b>부록</button>
+</div>
+
+<div id="toast"></div>
+<div id="qPct"></div>
+<div id="loader"><b>⏳ 불러오는 중…</b></div>
+<div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
+
+<script>
+/***************************************************************
+ * 벳공도전_hj 앱 화면 — 혼자 쓰는 베트남어 회화 공부 (영공도전_jw v2.9 화면을 바탕으로 만듦)
+ * VERSION 1.0   [v1.0] 처음 만듦
+ *   - 🥭 망고 색·망고 게임, 회화 7편(첫걸음·일상·식당·친구·쇼핑·길교통·여행호텔) + 전체 섞기
+ *   - 편마다 레벨 3개(쉬움·보통·어려움) × 단계 3개, 잠금 없음(아무 데나 눌러 바로 공부)
+ *   - 단계·레벨 진행률 %, 100%면 ✅ 다 했어요, 공부 중 실시간 ▲▼, 끝나고 요약
+ *   - 레벨 테스트(점수 기록, 통과하면 🏅), 문제: 뜻 고르기·듣고 고르기·베트남어로 고르기·따라 말하기·문장 배열
+ *   - 읽기·음성인식 vi-VN, 한글 발음 힌트 표시, 성조 부호만 다르면 정답 + "성조를 조금 더 살려요"
+ *   - 📌 내 단어장(🔍 한↔베 번역 찾기), 📚 부록(성조표·글자 소리표·따라 말하기), 🩺 점검
+ *   - 뺀 것: 사용자 등록·아빠 화면·그림판·보상·이벤트·공부 시간 신호·레벨 잠금·단계 시험·레벨 진단·대기 시간
+ * 고친 곳은 [v버전] 표시로 Ctrl+F 찾기
+ ***************************************************************/
+
+// ===================== 조절할 값 =====================
+const VERSION = '1.0';            // 앱 화면 버전 [v1.0]
+const SPEECH_LANG = 'vi-VN';      // [v1.0] 읽어 주기·음성인식 언어
+const PCT_TOAST_MS = 1600;        // 답할 때 진행률 ▲▼ 보여 주는 시간(ms)
+const LONG_TEXT = 'Xin chào mọi người. Tôi tên là Hyunjin, và tôi học tiếng Việt mỗi ngày. Sau giờ học, tôi thích đọc sách và uống cà phê với bạn bè.';   // 점검 화면 긴 문장 (속도 확인용)
+const LOG_ON = true;              // 점검 기록(마이크·목소리·오류)을 서버로 보냄 (false면 끔)
+const LOG_SEND_SEC = 30;          // 점검 기록을 모아서 보내는 간격(초)
+const CLOSE_MATCH_ON = true;      // 비슷한 발음(한 글자 차이)도 "거의 맞음"으로 통과
+const CLOSE_MIN_LEN = 5;          // [v1.0] 한 낱말 따라 말하기에서 "거의 맞음"을 보는 최소 글자 수 (성조 뺀 글자 기준)
+const MIC_TEST_SEC = 5;           // 점검 화면 마이크 소리 크기 재는 시간(초)
+const SLOW_API_MS = 1500;         // 서버 대답이 이보다 늦으면 점검 기록에 남김
+const SOUND_ON = true;            // 맞음 딩동 / 틀림 삑 소리 (false면 끔)
+const VIBRATE_ON = true;          // 누를 때 진동 (갤럭시만)
+const TEST_NEXT_MS = 800;         // 레벨 테스트에서 ⭕/❌ 보여 주고 다음 문제로 넘어가는 시간
+const LOADER_DELAY_MS = 150;      // 서버가 이 시간보다 늦으면 "불러오는 중" 표시
+const TITLE_APP = '🥭 벳공도전';   // 탭 이름
+const FLUSH_EVERY = 5;            // 공부 결과를 이 문제 수마다 서버에 저장
+const RIGHT_NEXT_MS = 900;        // 맞혔을 때 다음 문제로 넘어가는 시간(1000 = 1초)
+const SPEAK_TRIES = 3;            // 따라 말하기: 이만큼 틀리면 다음으로 넘어감
+const GAME_ROUND = 15;            // 망고 게임 한 판에 떨어지는 망고 수
+const GAME_MIN_WORDS = 3;         // 게임하려면 오늘 공부한 단어가 최소 이만큼 있어야 함
+const LIVES = 3;                  // 망고 게임 목숨
+const FALL_START_SEC = 9;         // 망고가 땅까지 떨어지는 시간(초) — 처음 (베트남어 읽는 시간 때문에 영어 앱보다 조금 느리게)
+const FALL_MIN_SEC = 5;           // 가장 빠를 때(초)
+const FALL_STEP_SEC = 0.3;        // 연속으로 맞힐 때마다 빨라지는 정도(초)
+const SPEED_STEPS = [1.0, 0.85, 0.7, 0.6, 0.5];   // 읽기 속도 ①~⑤ 값 (1이 보통 사람 말 빠르기, 작을수록 느림)
+const SPEED_NAME = ['빠르게', '보통', '천천히', '더 천천히', '아주 천천히'];   // 각 속도 이름
+const SPEED_DEFAULT = 2;          // 처음 속도 단계 (2 = 보통)
+const GAME_WRONG_WEIGHT = 2;      // 오늘 틀린 단어가 게임에 나오는 배수 (2 = 두 배 자주)
+// =====================================================
+
+let SERVER = '', ST = null, BANK = [], WMAP = {};
+let FOCUS = { lv: 0, st: -1 };   // 지금 공부할 레벨(0~2)과 단계(-1 = 레벨 전체)
+let lastAnswerAt = 0;
+
+/* ---------- 탭 이름·아이콘 ---------- */
+function setTab(title, emoji){
+  document.title = title;
+  const ic = document.getElementById('favIcon');
+  if(ic) ic.href = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E" + emoji + "%3C/text%3E%3C/svg%3E";
+}
+
+/* ---------- 저장소 (사파리에서 막혀도 안 멈추게) ---------- */
+function sget(k){ try{ return localStorage.getItem(k) || ''; }catch(e){ return ''; } }
+function sset(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+
+/* ---------- 서버 요청 ---------- */
+let LOADING = 0;
+async function api(action, data, opt){
+  const body = Object.assign({action}, data||{});
+  const quiet = opt && opt.quiet;
+  let t = null;
+  if(!quiet){ LOADING++; t = setTimeout(()=>{ if(LOADING) document.getElementById('loader').classList.add('on'); }, LOADER_DELAY_MS); }
+  try{
+    const t0 = Date.now();
+    const r = await fetch(SERVER, {method:'POST', body: JSON.stringify(body)});   // text/plain으로 가서 추가 확인 요청 없이 바로 가요
+    const j = await r.json();
+    const ms = Date.now() - t0;
+    if(ms > SLOW_API_MS && action !== 'devlog') dlog('slow', action+' '+ms+'ms (서버 안 '+(j.ms==null?'?':j.ms)+'ms)');
+    if(!j.ok){ if(action !== 'devlog') dlog('api-error', action+': '+(j.msg||'')); throw Object.assign(new Error(j.msg||'오류'), {res:j}); }
+    return j;
+  } finally {
+    if(!quiet){ clearTimeout(t); LOADING = Math.max(0, LOADING-1); if(!LOADING) document.getElementById('loader').classList.remove('on'); }
+  }
+}
+
+/* 효과음·진동 */
+let AC = null;
+function sfx(kind){
+  if(VIBRATE_ON && navigator.vibrate){ try{ navigator.vibrate(kind==='bad' ? [60,40,60] : kind==='ok' ? 35 : 12); }catch(e){} }
+  if(!SOUND_ON) return;
+  try{
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if(AC.state === 'suspended') AC.resume();
+    const notes = kind==='ok' ? [[880,0,.12],[1320,.1,.2]] : kind==='bad' ? [[180,0,.28]] : [[700,0,.05]];
+    notes.forEach(([f,t,d])=>{
+      const o = AC.createOscillator(), g = AC.createGain(), now = AC.currentTime;
+      o.type = kind==='bad' ? 'square' : 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, now+t); g.gain.exponentialRampToValueAtTime(kind==='bad'?0.12:0.25, now+t+0.01); g.gain.exponentialRampToValueAtTime(0.0001, now+t+d);
+      o.connect(g); g.connect(AC.destination); o.start(now+t); o.stop(now+t+d+0.03);
+    });
+  }catch(e){}
+}
+
+/* ---------- 화면 도우미 ---------- */
+function go(id){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on', s.id===id));
+  document.getElementById('nav').classList.toggle('on', id==='main');
+  window.scrollTo(0,0);
+}
+function toast(msg, ms){
+  const t = document.getElementById('toast');
+  t.innerHTML = msg; t.classList.add('on');
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('on'), ms||2600);
+}
+function modal(html){ document.getElementById('mbox').innerHTML = html; document.getElementById('modal').classList.add('on'); }
+function closeModal(){ document.getElementById('modal').classList.remove('on'); }
+function modalOpen(){ return document.getElementById('modal').classList.contains('on'); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function jsq(s){ return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function confetti(){
+  const set = ['🎉','✨','🥭','⭐','🏅'];
+  for(let i=0;i<24;i++){
+    const d = document.createElement('div'); d.className='confetti';
+    d.textContent = set[i%set.length]; d.style.left = Math.random()*100+'vw';
+    d.style.animationDelay = (Math.random()*0.8)+'s';
+    document.body.appendChild(d); setTimeout(()=>d.remove(), 3200);
+  }
+}
+/* 한글 발음 힌트 표시 줄 */
+function phHTML(ph, extra){ return ph ? `<div class="ph" ${extra||''}>${esc(ph)}</div>` : ''; }
+
+/* ---------- 베트남어 읽어주기 ---------- */
+let viVoice = null, voiceLogged = false;
+function viVoices(){ try{ return speechSynthesis.getVoices().filter(v=>/^vi/i.test(v.lang)); }catch(e){ return []; } }
+function pickVoice(){
+  try{
+    const vs = viVoices(), mine = sget('bg_voice');   // 점검 화면에서 고른 목소리가 먼저
+    viVoice = (mine && vs.find(v=>v.name===mine)) || vs.find(v=>/Google/i.test(v.name)) || vs.find(v=>/vi.VN/i.test(v.lang)) || vs[0] || null;
+    if(!voiceLogged && (vs.length || typeof speechSynthesis !== 'undefined')){ voiceLogged = true; dlog('tts-voices', {count: vs.length, pick: viVoice ? viVoice.name+' ('+viVoice.lang+')' : '없음', all: vs.map(v=>v.name).slice(0,12).join(', ')}); }
+  }catch(e){}
+}
+try{ speechSynthesis.onvoiceschanged = pickVoice; pickVoice(); }catch(e){}
+/* 읽기 속도 — 서버에 저장. d = 다음에 누르면 갈 방향 (1 느리게, -1 빠르게) */
+function speedState(){
+  if(ST && ST.speed && ST.speed.n) return ST.speed;
+  const n = parseInt(sget('bg_spd')); const d = parseInt(sget('bg_spd_d'));
+  return { n: n >= 1 && n <= SPEED_STEPS.length ? n : SPEED_DEFAULT, d: d === -1 ? -1 : 1 };
+}
+function speedStep(){ return Math.min(SPEED_STEPS.length, Math.max(1, speedState().n)); }
+function speechRate(){ return SPEED_STEPS[speedStep()-1]; }
+function speedLabel(){ const s = speedState(); return '🐢 ' + SPEED_NAME[speedStep()-1] + ' ' + (s.d > 0 ? '▼' : '▲'); }
+function refreshSpeedUI(){ document.querySelectorAll('.spdBtn').forEach(b=>b.textContent = speedLabel()); const ck = document.getElementById('ckSpd'); if(ck && ck.offsetParent) ck.innerHTML = speedButtons(); }
+function saveSpeed(n, d){
+  const max = SPEED_STEPS.length;
+  if(n >= max) d = -1; if(n <= 1) d = 1;   // 끝에 닿으면 방향을 바꿔요 (와이퍼처럼)
+  n = Math.min(max, Math.max(1, n));
+  if(ST){ ST.speed = {n, d}; api('setSpeed', {n, d}, {quiet:true}).catch(()=>{}); }
+  sset('bg_spd', n); sset('bg_spd_d', d);
+  dlog('tts-speed', {step:n, rate:SPEED_STEPS[n-1]});
+  refreshSpeedUI();
+  say(LAST_SAY || 'xin chào');   // 지금 단어를 바뀐 속도로 바로 다시 읽어요
+}
+/* 누를 때마다 한 칸씩: 보통→천천히→더 천천히→아주 천천히→더 천천히→…→빠르게→보통→… */
+function cycleSpeed(){ const s = speedState(); saveSpeed(s.n + s.d, s.d); }
+function speedButtons(){ return `<div class="row" style="flex-wrap:wrap;gap:6px">${SPEED_STEPS.map((v,i)=>`<button class="btn small ${i+1===speedStep()?'':'gray'}" style="flex:1 1 18%;padding:10px 0;font-size:13px" onclick="setSpeed(${i+1})">${SPEED_NAME[i]}</button>`).join('')}</div>`; }
+function setSpeed(n){ const s = speedState(); saveSpeed(n, n > s.n ? 1 : n < s.n ? -1 : s.d); }
+let LAST_SAY = '';
+function say(text){
+  LAST_SAY = text;
+  try{
+    if(!viVoice) pickVoice();
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = SPEECH_LANG; u.rate = speechRate(); if(viVoice) u.voice = viVoice;
+    u.onerror = (e)=>dlog('tts-error', (e && e.error) || '?');
+    speechSynthesis.speak(u);
+  }catch(e){ dlog('tts-error', e.message); }
+}
+
+/* ---------- 마이크 · 베트남어 채점 ---------- */
+const NUMV = {'0':'không','1':'một','2':'hai','3':'ba','4':'bốn','5':'năm','6':'sáu','7':'bảy','8':'tám','9':'chín','10':'mười'};
+let REC = null, recOn = false;
+function recogOK(){ return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+function nfc(s){ s = String(s==null?'':s); return s.normalize ? s.normalize('NFC') : s; }
+/* [v1.0] 소문자·NFC·문장부호 빼고 낱말 목록으로 */
+function normV(s){ return nfc(s).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ').split(/\s+/).filter(Boolean).map(x=>NUMV[x]||x); }
+/* [v1.0] 성조 부호(´ ` ̉ ̃ ̣)만 떼기 — â ă ê ô ơ ư 는 그대로 둠 */
+function toneless(s){ return nfc(String(s).normalize('NFD').replace(/[̣̀́̃̉]/g,'')); }
+function editDist(a, b){
+  const d = Array.from({length:a.length+1}, (_,i)=>[i].concat(Array(b.length).fill(0)));
+  for(let j=1;j<=b.length;j++) d[0][j] = j;
+  for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++) d[i][j] = Math.min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  return d[a.length][b.length];
+}
+function sameWords(hw, tw){ return tw.length>0 && (tw.every(w=>hw.includes(w)) || hw.join('')===tw.join('')); }
+/* 'exact' = 성조까지 같음, 'tone' = 성조 부호만 다름(정답 처리 + 안내), 'close' = 거의 맞음, '' = 틀림 */
+function heardMatch(heard, target){
+  const tw = normV(target);
+  if(heard.some(t=>sameWords(normV(t), tw))) return 'exact';
+  const tl = tw.map(toneless);
+  if(heard.some(t=>sameWords(normV(t).map(toneless), tl))) return 'tone';
+  if(CLOSE_MATCH_ON && tw.length===1 && tl[0].length>=CLOSE_MIN_LEN){
+    const lim = tl[0].length>=8 ? 2 : 1;
+    if(heard.some(t=>normV(t).some(w=>editDist(toneless(w), tl[0])<=lim))) return 'close';
+  }
+  return '';
+}
+const TONE_NOTE = '성조를 조금 더 살려요';
+const REC_ERR = { 'not-allowed':'마이크 허용 안 됨 (브라우저 설정에서 마이크 허용)', 'no-speech':'소리가 안 들어왔어요', 'network':'인터넷/구글 음성 서버 연결 안 됨',
+  'audio-capture':'마이크를 못 잡음 (다른 앱이 쓰는 중일 수 있음)', 'service-not-allowed':'이 브라우저에서 음성 인식 서비스가 막혀 있음', 'language-not-supported':'베트남어 인식이 지원 안 됨', 'aborted':'중간에 멈춤' };
+/* onDone(heardList, errCode) — 실패하면 빈 배열. onLive(글자) = 인식 중 실시간 글자 */
+function listen(btn, onDone, onLive){
+  if(recOn){ stopMic(); return; }
+  const R = window.SpeechRecognition || window.webkitSpeechRecognition;
+  try{
+    REC = new R(); REC.lang = SPEECH_LANG; REC.interimResults = true; REC.maxAlternatives = 5; REC.continuous = false;
+    let got = false, live = '', err = '';
+    const t0 = Date.now();
+    REC.onstart = ()=>dlog('mic-start', '');
+    REC.onaudiostart = ()=>dlog('mic-audio', '마이크 소리 받기 시작');
+    REC.onspeechstart = ()=>dlog('mic-speech', '말소리 감지');
+    REC.onresult = (ev)=>{
+      const res = ev.results[ev.results.length-1];
+      if(!res.isFinal && res.isFinal !== undefined){ live = res[0].transcript; if(onLive) onLive(live); return; }
+      if(got) return;
+      got = true; const h = []; for(const alt of res) h.push(alt.transcript);
+      if(live && h.indexOf(live)<0) h.push(live);
+      dlog('mic-result', {heard: h.join(' | '), ms: Date.now()-t0});
+      onDone(h, '');
+    };
+    REC.onerror = (ev)=>{ err = ev.error; dlog('mic-error', ev.error + (ev.message ? ' '+ev.message : ''));
+      if(ev.error==='not-allowed') toast('🎤 마이크 허용이 필요해요<br>(브라우저 설정 → 사이트 권한 → 마이크)'); };
+    REC.onend = ()=>{ recOn=false; if(btn){ btn.classList.remove('listen'); btn.dataset.lab && (btn.innerHTML = btn.dataset.lab); }
+      if(!got){ dlog('mic-end', {noResult:true, live, err, ms: Date.now()-t0}); onDone(live ? [live] : [], err); } };
+    REC.start(); recOn = true;
+    if(btn){ btn.dataset.lab = btn.innerHTML; btn.classList.add('listen'); btn.innerHTML = '🎙'; }
+  }catch(e){ dlog('mic-error', 'start 실패: '+e.message); toast('🎤 마이크를 켤 수 없어요'); }
+}
+function stopMic(){ try{ if(REC && recOn) REC.abort(); }catch(e){} recOn=false; }
+
+/* =============================================================
+ *  점검 기록 — 화면에서 생긴 일을 모아서 서버로 보냄
+ * ============================================================= */
+let LOGBUF = [];
+function dlog(ev, d){
+  if(!LOG_ON) return;
+  LOGBUF.push({t: new Date().toTimeString().slice(0,8), ev, d: typeof d === 'string' ? d : JSON.stringify(d==null?'':d)});
+  if(LOGBUF.length > 300) LOGBUF.splice(0, LOGBUF.length-300);
+  if(LOGBUF.length >= 40) flushLog();
+}
+function flushLog(keep){
+  if(!LOGBUF.length || !SERVER) return Promise.resolve();
+  const logs = LOGBUF.splice(0, 100);
+  try{
+    return fetch(SERVER, {method:'POST', keepalive: !!keep, body: JSON.stringify({action:'devlog', ua: navigator.userAgent, logs})}).catch(()=>{});
+  }catch(e){ return Promise.resolve(); }
+}
+setInterval(()=>flushLog(), LOG_SEND_SEC*1000);
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) flushLog(true); });
+window.addEventListener('error', (e)=>dlog('js-error', (e.message||'')+' @'+(e.lineno||'')));
+function autoDarkOn(){
+  try{
+    const d = document.createElement('div');
+    d.style.cssText = 'display:none;background-color:canvas;color-scheme:light';
+    document.body.appendChild(d);
+    const bg = getComputedStyle(d).backgroundColor; d.remove();
+    return bg !== 'rgb(255, 255, 255)';
+  }catch(e){ return null; }
+}
+function devInfo(){
+  return { ua: navigator.userAgent.slice(0,160), autoDark: autoDarkOn(), osDark: !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches),
+    recog: recogOK(), tts: 'speechSynthesis' in window, voices: viVoices().length, app: VERSION };
+}
+
+/* 텔레그램·카톡 안 창(웹뷰)은 읽어 주기가 없어요 → 크롬으로 열기 안내 */
+function inWebView(){ return !('speechSynthesis' in window); }
+function openInBrowserUrl(){
+  const q = '?s=' + encodeURIComponent(SERVER);
+  if(/Android/i.test(navigator.userAgent)) return 'intent://' + location.host + location.pathname + q + '#Intent;scheme=https;package=com.android.chrome;end';
+  return location.origin + location.pathname + q;
+}
+function webviewNotice(){
+  if(!inWebView()) return;
+  modal(`<div style="font-size:48px">🔇</div><h2>이 창에서는 소리가 안 나요</h2>
+    <p class="muted">이 창(텔레그램 안 등)은 베트남어를 읽어 주는 기능이 없어요.<br>크롬이나 삼성 인터넷으로 열어 주세요.</p>
+    <a class="btn" style="text-align:center;text-decoration:none" href="${openInBrowserUrl()}" onclick="dlog('webview-open','')">🌐 크롬으로 열기</a>
+    <p class="muted">안 되면 오른쪽 위 ⋮ → "다른 브라우저로 열기"를 눌러요.</p>
+    <button class="btn gray" onclick="closeModal()">그냥 쓸게요</button>`);
+  dlog('webview', navigator.userAgent.slice(0,120));
+}
+
+/* ---------- 🩺 점검 화면 ---------- */
+let CHECK_BACK = null, micStream = null, micTimer = null;
+function openCheck(){
+  CHECK_BACK = document.querySelector('.scr.on') ? document.querySelector('.scr.on').id : 'main';
+  stopMic(); go('check');
+  document.getElementById('ckVer').textContent = VERSION; document.getElementById('ckSec').textContent = MIC_TEST_SEC;
+  const i = devInfo();
+  dlog('check-open', i);
+  const yes = (b)=> b===null ? '모름' : b ? '예' : '아니요';
+  document.getElementById('ckInfo').innerHTML = [
+    ['브라우저', /SamsungBrowser/.test(i.ua) ? '삼성 인터넷' : /CriOS|Chrome/.test(i.ua) ? '크롬' : /Safari/.test(i.ua) ? '사파리' : '기타'],
+    ['폰 다크 모드', yes(i.osDark)], ['브라우저가 앱을 억지로 어둡게', yes(i.autoDark)],
+    ['음성 인식 기능', i.recog ? '있음' : '없음 (따라 말하기 문제는 듣고 고르기로 바뀜)'], ['베트남어 목소리 수', i.voices + '개' + (i.voices ? '' : ' (폰 설정 → 텍스트 음성 변환에서 베트남어 설치)')]
+  ].map(([k,v])=>`<div class="kv"><span>${k}</span><b style="white-space:normal;text-align:right">${esc(v)}</b></div>`).join('');
+  fillVoices();
+  document.getElementById('ckSpd').innerHTML = speedButtons();
+  window.scrollTo(0,0);
+}
+function closeCheck(){ micLevelStop(); stopMic(); flushLog(); if(CHECK_BACK==='quiz' && Q) go('quiz'); else if(ST) enterMain(); else go('setup'); }
+function fillVoices(){
+  const vs = viVoices(), sel = document.getElementById('ckVoice');
+  if(!vs.length){ sel.innerHTML = '<option>베트남어 목소리가 없어요 (폰 설정 → 텍스트 음성 변환에서 베트남어 설치)</option>'; return; }
+  sel.innerHTML = vs.map(v=>`<option value="${esc(v.name)}" ${viVoice && viVoice.name===v.name ? 'selected' : ''}>${esc(v.name)} · ${esc(v.lang)}${v.localService ? '' : ' (인터넷)'}</option>`).join('');
+}
+function pickUserVoice(){ const n = document.getElementById('ckVoice').value; sset('bg_voice', n); pickVoice(); dlog('tts-pick', n); testSay('xin chào'); }
+function testSay(t){ dlog('tts-test', {text: t, voice: viVoice ? viVoice.name : '없음', rate: speechRate()}); say(t); }
+async function micLevelTest(){
+  const btn = document.getElementById('ckMicBtn'), txt = document.getElementById('ckMicTxt'), bar = document.getElementById('ckMeter');
+  if(micStream){ micLevelStop(); return; }
+  try{
+    micStream = await navigator.mediaDevices.getUserMedia({audio:true});
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if(AC.state === 'suspended') await AC.resume();
+    const src = AC.createMediaStreamSource(micStream), an = AC.createAnalyser();
+    an.fftSize = 1024; src.connect(an);
+    const buf = new Float32Array(an.fftSize); let max = 0, sum = 0, n = 0;
+    const t0 = Date.now(); btn.textContent = '멈춤';
+    micTimer = setInterval(()=>{
+      an.getFloatTimeDomainData(buf);
+      let rms = 0; for(const x of buf) rms += x*x; rms = Math.sqrt(rms/buf.length);
+      const pct = Math.min(100, Math.round(rms*400));
+      bar.style.width = pct+'%'; max = Math.max(max, pct); sum += pct; n++;
+      txt.textContent = '지금 '+pct+'% · 최대 '+max+'%';
+      if(Date.now()-t0 > MIC_TEST_SEC*1000){
+        micLevelStop();
+        const verdict = max < 5 ? '소리가 거의 안 들어와요 (마이크 막힘/권한 확인)' : max < 20 ? '소리가 작아요' : '마이크 정상';
+        txt.textContent = '최대 '+max+'% · 평균 '+Math.round(sum/Math.max(1,n))+'% → '+verdict;
+        dlog('mic-level', {max, avg: Math.round(sum/Math.max(1,n)), verdict});
+      }
+    }, 60);
+  }catch(e){ txt.textContent = '마이크를 못 켰어요: '+(e.name||e.message); dlog('mic-level-error', (e.name||'')+' '+(e.message||'')); micLevelStop(); }
+}
+function micLevelStop(){
+  clearInterval(micTimer); micTimer = null;
+  if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream = null; }
+  const b = document.getElementById('ckMicBtn'); if(b) b.textContent = '시작';
+  const bar = document.getElementById('ckMeter'); if(bar) bar.style.width = '0';
+}
+function recogTest(){
+  micLevelStop();
+  const box = document.getElementById('ckHeard'), lg = document.getElementById('ckRecLog');
+  if(!recogOK()){ box.textContent = '이 브라우저는 음성 인식이 없어요'; dlog('recog-test', '기능 없음'); return; }
+  box.textContent = '듣는 중…'; const t0 = Date.now();
+  listen(document.getElementById('ckRecBtn'), (heard, err)=>{
+    const ms = Date.now()-t0;
+    if(!heard.length){ box.innerHTML = '<span style="color:var(--bad)">못 알아들음</span>'; lg.textContent = (err ? '오류: '+err+' — '+(REC_ERR[err]||'') : '결과 없이 끝남')+' · '+ms+'ms\n'+lg.textContent; return; }
+    const m = heardMatch(heard, 'xin chào');
+    box.innerHTML = esc(heard[0]) + (m==='exact' ? ' ⭕' : m==='tone' ? ' 🔶 성조만 달라요' : m==='close' ? ' 🔶 거의' : ' ❌');
+    lg.textContent = '들린 말 후보: '+heard.join(' / ')+' · '+ms+'ms\n'+lg.textContent;
+    dlog('recog-test', {heard: heard.join(' | '), match: m || 'no', ms});
+  }, (live)=>{ box.textContent = live + ' …'; });
+}
+async function serverSpeedTest(){
+  const el = document.getElementById('ckSrv'); el.textContent = '재는 중…';
+  const ts = [];
+  for(let k=0;k<3;k++){ const t0 = Date.now(); try{ await api('ping', {}, {quiet:true}); ts.push(Date.now()-t0); }catch(e){ ts.push(-1); } }
+  el.textContent = ts.map(t=>t<0?'실패':(t/1000).toFixed(1)+'초').join(' / ');
+  dlog('server-speed', ts.join(','));
+}
+async function sendCheck(){
+  dlog('check-send', devInfo());
+  while(LOGBUF.length) await flushLog();
+  toast('📤 보냈어요. 서버에 최근 점검 기록이 남았어요');
+}
+
+/* =============================================================
+ *  시작
+ * ============================================================= */
+function readHash(){
+  // #s=서버주소 (또는 ?s=서버주소)
+  const h = decodeURIComponent(location.hash.slice(1));
+  const qs = new URLSearchParams(location.search).get('s');   // 크롬으로 열기 링크(?s=서버주소)
+  if(qs && /^https:\/\/script\.google\.com\//.test(qs)){ sset('bg_server', qs); history.replaceState(null,'', location.pathname + location.hash); }
+  h.split('&').forEach(p=>{
+    if(p.indexOf('s=')===0){ const u = p.slice(2); if(/^https:\/\/script\.google\.com\//.test(u)) sset('bg_server', u); }
+  });
+  if(h.indexOf('s=')>=0) history.replaceState(null,'', location.pathname + location.search);
+}
+/* 단어 목록 만들기: 서버가 보낸 PACKS 모양(한 줄 = 베트남어|뜻|한글 발음)을 id로 풀어 둠 — id 규칙은 서버(Code.gs)와 같아야 해요 */
+function buildWMAP(){
+  WMAP = {};
+  BANK.forEach(p=>p.levels.forEach((L,l)=>L.stages.forEach((S,s)=>S.w.forEach((line,i)=>{
+    const a = String(line).split('|').map(x=>x.trim());
+    if(!a[0]) return;
+    const id = p.key+'.'+l+'.'+s+'.'+i;
+    WMAP[id] = {id, vi:nfc(a[0]), ko:a[1]||'', ph:a[2]||'', pack:p.key, lv:l, st:s};
+  }))));
+  if(ST && ST.my) setMy(ST.my);
+}
+async function boot(){
+  readHash();
+  SERVER = sget('bg_server');
+  if(!SERVER){ go('setup'); return; }
+  try{
+    const f = sget('bg_focus'); if(f){ try{ const o = JSON.parse(f); if(o && o.lv>=0 && o.lv<=2) FOCUS = {lv:o.lv, st:(o.st>=-1&&o.st<=2)?o.st:-1}; }catch(e){} }
+    const j = await api('init');
+    ST = j; BANK = j.bank; delete ST.bank; buildWMAP();
+    setTab(TITLE_APP, '🥭');
+    dlog('boot', devInfo());
+    setTimeout(webviewNotice, 800);
+    document.getElementById('verLine').textContent = '앱 v'+VERSION+' · 서버 v'+j.version;
+    enterMain();
+  }catch(e){
+    go('setup'); document.getElementById('setupMsg').textContent = '서버 연결 실패: '+e.message+' — 주소를 확인하세요.';
+  }
+}
+function saveServer(){
+  const v = document.getElementById('serverIn').value.trim();
+  if(!/^https:\/\/script\.google\.com\/.+\/exec/.test(v)){ document.getElementById('setupMsg').textContent='…/exec 로 끝나는 주소를 넣어 주세요.'; return; }
+  sset('bg_server', v); location.reload();
+}
+
+/* =============================================================
+ *  메인 화면
+ * ============================================================= */
+function enterMain(){ go('main'); showTab(sget('bg_tab') || 'tabStudy'); refreshSpeedUI(); }
+function showTab(t){
+  sset('bg_tab', t);
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x.id===t));
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on', b.dataset.t===t));
+  if(t==='tabStudy') renderHome();
+  if(t==='tabGame') renderGameTab();
+  if(t==='tabWords') renderWords();
+  if(t==='tabExtra') renderExtra();
+  window.scrollTo(0,0);
+}
+function setFocus(lv, st){ FOCUS = {lv, st}; sset('bg_focus', JSON.stringify(FOCUS)); }
+function focusName(){
+  const L = ST.levels[FOCUS.lv]; if(!L) return '';
+  return L.name + ' · ' + (FOCUS.st >= 0 && L.stages[FOCUS.st] ? (FOCUS.st+1)+'단계 '+L.stages[FOCUS.st].name : '레벨 전체');
+}
+function renderHome(){
+  document.getElementById('streakChip').textContent = '🔥 '+ST.streak+'일';
+  const pct = Math.min(100, Math.round(ST.todayDone/ST.goal*100));
+  document.getElementById('todayBar').style.width = pct+'%';
+  document.getElementById('todayTxt').textContent = ST.todayDone+' / '+ST.goal+'문제';
+  const done = ST.todayDone >= ST.goal;
+  const sb = document.getElementById('studyBtn');
+  sb.textContent = done ? '🎉 오늘 목표 달성! 더 공부하기' : (ST.todayDone ? '이어서 학습하기 ('+(ST.goal-ST.todayDone)+'문제 남음)' : '오늘의 학습 시작 ('+ST.goal+'문제)');
+  sb.className = 'btn' + (done ? ' green' : '');
+  sb.onclick = ()=>startStudy(done);
+  document.getElementById('focusTxt').textContent = '📍 지금 공부할 곳: '+focusName()+'  (아래에서 바꿔요)';
+  document.getElementById('modeTitle').textContent = (ST.modes||{})[ST.mode] || '';
+  document.getElementById('levelCards').innerHTML = ST.levels.map((L,li)=>{
+    const full = L.pct >= 100;
+    const isF = FOCUS.lv===li && FOCUS.st===-1;
+    const stg = L.stages.map((S,si)=>{
+      const sd = S.pct >= 100;
+      return `<div class="stg ${FOCUS.lv===li&&FOCUS.st===si?'focus':''}" onclick="studyScope(${li},${si})"><span>${sd?'✅':'🥭'} ${si+1}. ${esc(S.name)}</span>${sd?'<span class="doneTag">다 했어요</span>':`<span class="muted">외움 ${S.learned}/${S.total} ▶</span>`}
+        <div class="pbar"><div class="bar"><i style="width:${S.pct}%"></i></div><b>${S.pct}%</b></div></div>`;
+    }).join('');
+    return `<div class="card lvcard ${isF?'focus':''}">
+      <div class="top"><b style="font-size:18px">${L.passed?'🏅 ':''}${esc(L.name)}</b>${full?'<span class="doneTag">✅ 다 했어요</span>':`<span class="muted">외움 ${L.learned}/${L.total}</span>`}</div>
+      <div class="pbar"><div class="bar"><i style="width:${L.pct}%"></i></div><b>${L.pct}%</b></div>
+      <div class="row"><button class="btn small" onclick="studyScope(${li},-1)">▶ ${esc(L.name)} 공부</button><button class="btn small gray" onclick="confirmTest(${li})">📝 레벨 테스트${L.best!=null?' ('+(L.passed?'🏅 ':'')+'최고 '+L.best+'점)':''}</button></div>
+      <div style="margin-top:8px">${stg}</div></div>`;
+  }).join('');
+}
+function studyScope(lv, st){ setFocus(lv, st); startStudy(false); }
+
+/* ---------- 설정 ---------- */
+function openSettings(){
+  modal(`<h2>⚙️ 설정</h2>
+    <p class="muted">공부할 편 (서버에 저장돼요)</p>
+    <div class="row" style="flex-wrap:wrap">${Object.keys(ST.modes||{}).map(m=>`<button class="btn small ${m===ST.mode?'':'gray'}" style="flex:1 1 45%" onclick="setMode('${m}')">${esc(ST.modes[m])}</button>`).join('')}</div>
+    <p class="muted">하루 공부량 (문제 수)</p>
+    <div class="row" style="flex-wrap:wrap">${ST.goalChoices.map(g=>`<button class="btn small ${g===ST.goal?'':'gray'}" style="flex:1 1 20%" onclick="setGoal(${g})">${g}</button>`).join('')}</div>
+    <button class="btn gray small" onclick="closeModal();openCheck()">🩺 점검 (소리·마이크 문제 찾기)</button>
+    <button class="btn" onclick="closeModal()">닫기</button>
+    <p class="muted">앱 v${VERSION} · 서버 v${esc(ST.version)}</p>`);
+}
+function setGoal(g){   // 누르는 즉시 바뀌고, 저장은 뒤에서
+  const old = ST.goal;
+  ST.goal = g; closeModal(); if(document.getElementById('tabStudy').classList.contains('on')) renderHome(); toast('하루 '+g+'문제로 바꿨어요');
+  api('setGoal',{goal:g},{quiet:true}).then(j=>{ ST = Object.assign(ST, j); if(document.getElementById('tabStudy').classList.contains('on')) renderHome(); })
+    .catch(e=>{ ST.goal = old; renderHome(); toast('저장 실패: '+e.message); });
+}
+async function setMode(m){
+  closeModal();
+  try{ const j = await api('setMode', {mode:m}); ST = Object.assign(ST, j); setFocus(0, -1); WTAB = 0; showTab('tabStudy'); toast('공부 편: '+esc(ST.modes[m])); }
+  catch(e){ toast('저장 실패: '+e.message); }
+}
+
+/* =============================================================
+ *  문제 화면 (공부·레벨 테스트)
+ * ============================================================= */
+let Q = null;
+async function startStudy(more){
+  try{
+    const j = await api('study', {level:FOCUS.lv, stage:FOCUS.st, more: !!more});
+    if(!j.questions.length){ toast(j.msg || '문제가 없어요'); renderHome(); return; }
+    startQuiz('study', j.questions);
+  }catch(e){ toast(e.message); }
+}
+function startQuiz(mode, qs, extra){
+  Q = Object.assign({mode, qs, i:-1, results:[], answers:[], right:0, tRight:0, tWrong:0, timer:0, lock:false, flushing:Promise.resolve(), bx:{}}, extra||{});
+  document.getElementById('qScore').innerHTML = mode==='test' ? '<span style="color:var(--ok)">⭕ 0</span> <span style="color:var(--bad)">❌ 0</span>' : '';
+  document.getElementById('qTimerWrap').style.display = mode==='test' ? '' : 'none';
+  refreshSpeedUI();
+  go('quiz'); nextQ();
+}
+function nextQ(){
+  if(!Q) return;   // 그만둔 뒤 늦게 오는 다음 문제 막기
+  clearInterval(Q.timer); stopMic();
+  Q.i++; Q.lock = false;
+  if(Q.i >= Q.qs.length){ finishQuiz(); return; }
+  const q = Q.qs[Q.i];
+  document.getElementById('qBar').style.width = Math.round(Q.i/Q.qs.length*100)+'%';
+  document.getElementById('qCount').textContent = (Q.i+1)+' / '+Q.qs.length;
+  let type = q.type;
+  if(type==='speak' && !recogOK()) type = 'listen';   // 마이크가 안 되면 듣고 고르기로
+  Q.type = type; Q.tries = 0;
+  let h = '';
+  if(type==='arrange') h = arrangeHTML(q);
+  else if(type==='speak') h = speakHTML(q);
+  else h = choiceHTML(q, type);
+  document.getElementById('qArea').innerHTML = h;
+  if(type==='arrange') Q.placed = [];
+  if(type==='meaning' || type==='listen') setTimeout(()=>say(q.say), 250);
+  if(Q.mode==='test') startTimer();
+}
+function promptHTML(q, type){
+  const big = (t)=>`<div class="qbig">${esc(t)}</div>`;
+  const sayBtn = `<button class="qsay" onclick="qSay()">🔊</button>`;
+  const phBox = q.ph ? `<div class="ph" id="qPh" style="visibility:hidden">${esc(q.ph)}</div>` : '';   // 🔊 누르면 한글 발음이 보여요
+  if(type==='meaning') return `<div class="qkind">뜻이 뭘까요?</div>${big(q.vi)}${phBox}${sayBtn}`;
+  if(type==='listen') return `<div class="qkind">듣고 뜻을 고르세요</div>${sayBtn}`;
+  if(type==='ko2vi') return `<div class="qkind">베트남어로 뭘까요?</div>${big(q.ko)}`;
+  return big(q.vi);
+}
+/* 🔊 누르면 읽고, 단어가 보이는 문제면 한글 발음도 보여 줘요 */
+function qSay(){
+  const q = Q && Q.qs[Q.i]; if(!q) return;
+  say(q.say);
+  const e = document.getElementById('qPh'); if(e) e.style.visibility = 'visible';
+}
+function choiceHTML(q, type){
+  return `<div class="qbox">${promptHTML(q, type)}</div><div class="opts">${q.choices.map((c,k)=>
+    `<button onclick="choose(${k}, this)">${esc(c)}</button>`).join('')}</div>
+    <button class="dunno" onclick="dunno()">🤷 모르겠어요</button><div id="fbArea"></div>`;
+}
+function choose(k, btn){
+  if(!Q || Q.lock) return;
+  const q = Q.qs[Q.i];
+  lastAnswerAt = Date.now();
+  Q.lock = true;
+  const ok = k === q.answer;
+  markChoice(q, k, ok);
+  if(Q.mode === 'test'){ Q.answers.push(k); testCount(ok); setTimeout(nextQ, TEST_NEXT_MS); return; }
+  record(q, ok);
+  feedback(q, ok);
+}
+/* 맞은 보기 초록 ⭕, 고른 틀린 보기 빨강 ❌ + 소리 */
+function markChoice(q, k, ok){
+  const bs = document.querySelectorAll('.opts button');
+  if(q.answer !== undefined && bs[q.answer]) bs[q.answer].classList.add('right');
+  if(!ok && k >= 0 && bs[k]) bs[k].classList.add('wrong');
+  sfx(ok ? 'ok' : 'bad');
+}
+function testCount(ok){
+  if(ok) Q.tRight++; else Q.tWrong++;
+  document.getElementById('qScore').innerHTML = `<span style="color:var(--ok)">⭕ ${Q.tRight}</span> <span style="color:var(--bad)">❌ ${Q.tWrong}</span>`;
+}
+/* 🤷 모르겠어요 = 틀린 걸로 침 */
+function dunno(){
+  if(!Q || Q.lock) return;
+  const q = Q.qs[Q.i];
+  Q.lock = true; lastAnswerAt = Date.now(); stopMic();
+  const isArr = Q.type === 'arrange';
+  if(Q.mode === 'test'){
+    Q.answers.push(isArr ? '' : -1); if(!isArr) markChoice(q, -1, false); else showArrAnswer(q, false);
+    testCount(false); setTimeout(nextQ, isArr ? TEST_NEXT_MS+900 : TEST_NEXT_MS); return; }
+  if(!isArr && Q.type !== 'speak') markChoice(q, -1, false); else sfx('bad');
+  record(q, false);
+  feedback(q, false, true);
+}
+/* 답하면 단계·레벨 진행률을 바로 계산해서 ▲▼로 보여 줘요 (서버 규칙과 같게: 맞히면 +1, 틀리면 -2, 점수는 최대 learnedBox) */
+function pctMove(q, ok){
+  if(typeof q.lv !== 'number' || q.st == null) return;
+  const L = ST.levels[q.lv], st = L && L.stages[q.st]; if(!st || !st.max) return;
+  const R = ST.rules, LB = R.learnedBox || 3;
+  const b0 = Q.bx[q.id] != null ? Q.bx[q.id] : (q.box || 0);
+  const nb = ok ? Math.min(R.maxBox||5, b0+1) : Math.max(0, b0-(R.wrongDrop||2));
+  const d = Math.min(nb, LB) - Math.min(b0, LB);
+  Q.bx[q.id] = nb;
+  const key = q.lv+':'+q.st;
+  if(!Q.pctStart) Q.pctStart = {};
+  if(Q.pctStart[key] == null) Q.pctStart[key] = st.pct || 0;
+  const before = st.pct || 0;
+  st.pts = Math.max(0, Math.min(st.max, (st.pts||0) + d));
+  st.pct = Math.floor(st.pts / st.max * 100);
+  if(L.max){ L.pts = Math.max(0, Math.min(L.max, (L.pts||0) + d)); L.pct = Math.floor(L.pts / L.max * 100); }
+  const el = document.getElementById('qPct');
+  el.innerHTML = `📈 ${esc(L.name)} · ${esc(st.name)}  ${before}% → ${st.pct}% ${st.pct>before?'<span style="color:#7CFC9A">▲</span>':st.pct<before?'<span style="color:#ff8a8a">▼</span>':'＝'}`;
+  el.classList.add('on'); clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('on'), PCT_TOAST_MS);
+}
+function pctSummary(q){
+  if(!q.pctStart) return '';
+  return Object.keys(q.pctStart).map(k=>{ const [lv,si] = k.split(':').map(Number); const L = ST.levels[lv], st = L.stages[si];
+    return `<div class="kv"><span>${esc(L.name)} · ${esc(st.name)}</span><b>${q.pctStart[k]}% → ${st.pct}% ${st.pct>q.pctStart[k]?'▲':st.pct<q.pctStart[k]?'▼':''}</b></div>`; }).join('');
+}
+
+/* 공부 결과 기록 + 피드백 */
+function record(q, ok, skip){
+  Q.results.push({id:q.id, ok:!!ok, skip:!!skip});
+  if(!skip) pctMove(q, ok);
+  if(!skip && ok) Q.right++;
+  if(Q.results.length - (Q.flushed||0) >= FLUSH_EVERY) flush();
+}
+function feedback(q, ok, dunnoFlag, note){
+  const isG = q.type==='arrange';
+  say(q.vi);
+  const canPin = q.id && !/^m/.test(q.id);
+  const pinBtn = canPin ? `<button onclick="togglePin('${jsq(q.id)}', this)">${isPinned(q.id)?'📌 내 단어장에서 빼기':'📌 내 단어장에 넣기'}</button>` : '';
+  const replay = `<div class="replay"><button onclick="say('${jsq(q.vi)}')">🔁 다시 듣기</button>${pinBtn}</div>`;
+  const extra = `<div><b style="font-size:18px">${esc(q.vi)}</b> · ${esc(q.ko)}</div>${phHTML(q.ph)}${replay}`;
+  const fb = document.getElementById('fbArea');
+  if(ok){
+    fb.innerHTML = `<div class="fb good"><b style="color:var(--ok)">⭕ 정답!</b>${note?` <span class="muted">${note}</span>`:''}${isG||note?`<div style="margin-top:6px">${extra}</div>`:''}</div>`;
+    setTimeout(nextQ, (isG||note) ? RIGHT_NEXT_MS+900 : RIGHT_NEXT_MS);
+  } else {
+    fb.innerHTML = `<div class="fb bad"><b style="color:var(--bad)">${dunnoFlag?'🤷 괜찮아요, 이렇게 외워요':'❌ 아쉬워요'}</b> <span class="muted">오답노트에 넣었어요</span><div style="margin-top:6px">${extra}</div><button class="btn small" onclick="nextQ()">다음 ▶</button></div>`;
+  }
+}
+
+/* 문장 배열 — 베트남어 표현을 띄어쓰기로 나눈 조각을 한국어 뜻에 맞게 놓기 [v1.0] */
+function arrangeHTML(q){
+  return `<div class="qbox"><div class="qkind">한국어 뜻에 맞게 베트남어 문장을 만들어 보세요</div><div class="qmid">${esc(q.ko)}</div>
+    <div class="slot" id="slot"></div>
+    ${q.tokens.length > q.need ? `<p class="muted">⚠️ 필요 없는 조각도 섞여 있어요 (${q.need}개만 써요)</p>` : ''}</div>
+    <div class="pool" id="pool">${q.tokens.map((t,k)=>`<button class="tok" data-k="${k}" onclick="placeTok(${k})">${esc(t)}</button>`).join('')}</div>
+    <div class="row"><button class="btn gray" onclick="clearTok()">다시</button><button class="btn" id="arrOk" onclick="checkArrange()" disabled>확인</button></div>
+    <button class="dunno" onclick="dunno()">🤷 모르겠어요</button><div id="fbArea"></div>`;
+}
+function placeTok(k){
+  if(Q.lock) return;
+  const q = Q.qs[Q.i];
+  Q.placed.push(k); sfx('tap');
+  document.querySelector(`#pool .tok[data-k="${k}"]`).classList.add('used');
+  drawSlot(q);
+}
+function unplace(pos){
+  if(Q.lock) return;
+  const k = Q.placed.splice(pos,1)[0];
+  document.querySelector(`#pool .tok[data-k="${k}"]`).classList.remove('used');
+  drawSlot(Q.qs[Q.i]);
+}
+function clearTok(){ if(Q.lock) return; Q.placed = []; document.querySelectorAll('#pool .tok').forEach(t=>t.classList.remove('used')); drawSlot(Q.qs[Q.i]); }
+function drawSlot(q){
+  document.getElementById('slot').innerHTML = Q.placed.map((k,p)=>`<button class="tok" onclick="unplace(${p})">${esc(q.tokens[k])}</button>`).join('');
+  document.getElementById('arrOk').disabled = Q.placed.length !== (q.need || q.tokens.length);
+}
+/* 레벨 테스트에서 배열 정답 보여 주기 */
+function showArrAnswer(q, ok){
+  const fb = document.getElementById('fbArea');
+  if(fb) fb.innerHTML = `<div class="fb ${ok?'good':'bad'}"><b style="color:var(${ok?'--ok':'--bad'})">${ok?'⭕ 정답!':'❌ 정답은'}</b><div class="qmid" style="font-size:16px">${esc(q.answer)}</div></div>`;
+  sfx(ok ? 'ok' : 'bad');
+}
+function checkArrange(){
+  if(Q.lock) return;
+  const q = Q.qs[Q.i];
+  Q.lock = true; lastAnswerAt = Date.now();
+  const given = Q.placed.map(k=>q.tokens[k]).join(' ');
+  const ok = given === q.answer;
+  if(Q.mode === 'test'){ Q.answers.push(given); showArrAnswer(q, ok); testCount(ok); setTimeout(nextQ, TEST_NEXT_MS+900); return; }
+  sfx(ok ? 'ok' : 'bad');
+  record(q, ok); feedback(q, ok);
+}
+
+/* 따라 말하기 */
+function speakHTML(q){
+  return `<div class="qbox"><div class="qkind">듣고 따라 말해 보세요</div>
+    <div class="qbig">${esc(q.vi)}</div>${phHTML(q.ph)}<div class="muted">${esc(q.ko)}</div>
+    <button class="qsay" onclick="qSay()">🔊 듣기</button></div>
+    <div style="text-align:center"><button class="micbig" id="micBig" onclick="speakTap()">🎤</button><p class="muted" id="spkMsg">마이크를 누르고 말해요</p>
+    <button class="chip" style="margin-bottom:6px" onclick="openCheck()">🩺 마이크 점검</button><br>
+    <button class="btn gray small" style="width:auto;display:inline-block;padding:8px 16px" onclick="speakSkip()">지금은 말하기 어려워요 (건너뛰기)</button>
+    <button class="dunno" onclick="dunno()">🤷 모르겠어요</button></div><div id="fbArea"></div>`;
+}
+function speakTap(){
+  if(!Q || Q.lock) return;
+  const q = Q.qs[Q.i], idx = Q.i;
+  document.getElementById('spkMsg').textContent = '듣는 중… 말해 보세요';
+  listen(document.getElementById('micBig'), (heard, err)=>{
+    if(!Q || Q.i!==idx || Q.lock) return;
+    if(!heard.length){ document.getElementById('spkMsg').innerHTML = '잘 안 들렸어요. 다시 눌러 보세요' + (err ? '<br><span style="color:var(--bad)">('+esc(REC_ERR[err]||err)+')</span>' : ''); return; }
+    lastAnswerAt = Date.now();
+    const m = heardMatch(heard, q.vi);
+    if(m){
+      Q.lock = true; sfx('ok'); record(q, true);
+      feedback(q, true, false, m==='tone' ? '🔶 '+TONE_NOTE+' (들린 말: '+esc(heard[0])+')' : m==='close' ? '거의 맞았어요 (들린 말: '+esc(heard[0])+')' : '');
+      return; }
+    Q.tries++;
+    document.getElementById('spkMsg').innerHTML = '들린 말: <b>'+esc(heard[0])+'</b> — 다시 해 봐요';
+    say(q.vi);
+    if(Q.tries >= SPEAK_TRIES){ Q.lock = true; sfx('bad'); record(q, false); feedback(q, false); }
+    else sfx('bad');
+  }, (live)=>{ const m = document.getElementById('spkMsg'); if(m && Q && Q.i===idx) m.innerHTML = '들리는 말: <b>'+esc(live)+'</b>'; });
+}
+function speakSkip(){ if(!Q || Q.lock) return; Q.lock = true; stopMic(); record(Q.qs[Q.i], false, true); nextQ(); }
+
+/* 레벨 테스트 타이머 */
+function startTimer(){
+  const q = Q.qs[Q.i], t0 = Date.now(), bar = document.getElementById('qTimer'), sec = q.sec || Q.sec || 12;
+  const isArr = Q.type === 'arrange';
+  Q.timer = setInterval(()=>{
+    const left = 1 - (Date.now()-t0)/(sec*1000);
+    bar.style.width = Math.max(0,left*100)+'%';
+    if(left<=0 && !Q.lock){
+      Q.lock = true; clearInterval(Q.timer);
+      Q.answers.push(isArr ? '' : -1);
+      if(isArr) showArrAnswer(q, false); else markChoice(q, -1, false);
+      testCount(false); setTimeout(nextQ, isArr ? TEST_NEXT_MS+900 : TEST_NEXT_MS);
+    }
+  }, 100);
+}
+
+/* 결과 저장 */
+function flush(){
+  const from = Q.flushed||0, part = Q.results.slice(from);
+  if(!part.length) return Q.flushing;
+  Q.flushed = Q.results.length;
+  const myQ = Q;
+  Q.flushing = Q.flushing.then(()=>api('studyResult', {results: part}, {quiet:true}).then(j=>{
+    ST = Object.assign(ST, j);
+    if(j.my) setMy(j.my);
+    if(j.goalHit) myQ.goalHit = true;
+  }).catch(e=>{ toast('저장 실패: '+e.message); }));
+  return Q.flushing;
+}
+function quitQuiz(){
+  if(!Q) return;
+  if(Q.mode==='test'){ modal(`<h2>테스트를 그만할까요?</h2><p class="muted">점수는 기록되지 않아요. 언제든 바로 다시 볼 수 있어요.</p><div class="row"><button class="btn gray" onclick="closeModal()">계속하기</button><button class="btn" onclick="closeModal();clearInterval(Q.timer);Q=null;enterMain()">그만하기</button></div>`); return; }
+  modal(`<h2>그만할까요?</h2><p class="muted">지금까지 푼 건 저장돼요.</p><div class="row"><button class="btn gray" onclick="closeModal()">계속하기</button><button class="btn" onclick="closeModal();finishQuiz(true)">그만하기</button></div>`);
+}
+async function finishQuiz(quit){
+  clearInterval(Q.timer); stopMic();
+  const q = Q;
+  document.getElementById('qBar').style.width = '100%';
+  if(q.mode==='study'){
+    document.getElementById('qArea').innerHTML = '<div class="qbox"><div class="qmid">저장하는 중...</div></div>';
+    await flush();
+    Q = null;
+    const n = q.results.filter(r=>!r.skip).length;
+    enterMain(); showTab('tabStudy');
+    const goal = ST.todayDone >= ST.goal;
+    modal(`<div style="font-size:56px">${q.goalHit?'🎉':'📚'}</div><h2>${quit?'여기까지!':'학습 끝!'}</h2>
+      <p style="font-size:18px">${q.right} / ${n} 정답</p>
+      <p>오늘 ${ST.todayDone} / ${ST.goal}문제 ${goal?'✅':''}</p>
+      ${pctSummary(q)?`<div class="card" style="text-align:left;margin:8px 0"><b>📈 진행률</b>${pctSummary(q)}</div>`:''}
+      ${q.goalHit?`<p><b>🔥 ${ST.streak}일째 연속 학습!</b></p>`:''}
+      <div class="row"><button class="btn gray" onclick="closeModal();showTab('tabGame')">🎮 게임으로 복습</button><button class="btn" onclick="closeModal()">확인</button></div>`);
+    if(q.goalHit) confetti();
+    return;
+  }
+  if(q.mode==='test'){
+    document.getElementById('qArea').innerHTML = '<div class="qbox"><div class="qmid">채점 중...</div></div>';
+    try{
+      const j = await api('testSubmit', {answers:q.answers});
+      ST = Object.assign(ST, j); Q = null;
+      const r = j.result;
+      enterMain(); showTab('tabStudy');
+      if(r.pass) confetti();
+      const wrong = r.review.filter(x=>!x.ok).map(x=>x.word);
+      modal(`<div style="font-size:60px">${r.pass?'🏅':'💪'}</div><h2>${r.score}점 ${r.pass?'통과!':'아쉬워요'}</h2>
+        <p class="muted">${r.pass?'🏅 가 붙었어요! 최고 점수 '+r.best+'점':r.passScore+'점 넘으면 통과! 바로 다시 볼 수 있어요.'}</p>
+        ${wrong.length?`<p class="muted">틀린 문제: ${esc(wrong.join(', '))}</p>`:''}
+        <div class="row"><button class="btn gray" onclick="closeModal()">확인</button><button class="btn" onclick="closeModal();startTest(${r.level})">다시 보기</button></div>`);
+    }catch(e){ toast(e.message); enterMain(); }
+  }
+}
+
+/* ---------- 레벨 테스트 (다음 레벨을 여는 용도가 아니라 점수 기록용) ---------- */
+function confirmTest(lv){
+  const L = ST.levels[lv];
+  modal(`<div style="font-size:54px">📝</div><h2>${esc(L.name)} 레벨 테스트</h2><p>최대 ${ST.rules.testCount}문제 · 문제당 ${ST.rules.testSec}초<br><b>${ST.rules.passScore}점 이상</b>이면 🏅 가 붙어요</p><p class="muted">점수만 기록해요. 다음 레벨은 이미 열려 있고, 떨어져도 바로 다시 볼 수 있어요.</p>
+  <div class="row"><button class="btn gray" onclick="closeModal()">나중에</button><button class="btn" onclick="closeModal();startTest(${lv})">시작!</button></div>`);
+}
+async function startTest(lv){
+  try{
+    const j = await api('testStart', {level: lv});
+    startQuiz('test', j.questions, {sec:j.secPerQ, level:lv});
+  }catch(e){ toast(e.message); }
+}
+
+/* =============================================================
+ *  📒 단어장 · 오답노트
+ * ============================================================= */
+let WTAB = 0;   // 0 = 오답노트, 'my' = 내 단어장, 'L0'~'L2' = 레벨 낱말
+function goWrongNote(){ WTAB = 0; showTab('tabWords'); }
+async function renderWords(){
+  if(WTAB === null || WTAB === undefined) WTAB = 0;
+  const chips = ST.levels.map((l,i)=>`<button class="${WTAB==='L'+i?'on':''}" onclick="WTAB='L${i}';renderWords()">${esc(l.name)}</button>`).join('');
+  document.getElementById('wordChips').innerHTML = `<button class="${WTAB==='my'?'on':''}" onclick="WTAB='my';renderWords()">📌 내 단어장</button><button class="${WTAB===0?'on':''}" onclick="WTAB=0;renderWords()">📒 오답노트</button>`+chips;
+  const box = document.getElementById('wordList');
+  document.getElementById('wordHelp').textContent = WTAB==='my' ? '자주 잊는 말, 여행에서 쓰고 싶은 말을 직접 모아요.' : WTAB===0 ? '오늘 틀린 단어가 먼저, 그다음 아직 못 외운 단어예요. ⭐ 는 다음 학습에 먼저 나와요.' : '⭐ 다음 학습에 먼저 · 📌 내 단어장에 담기 (지금 편: '+((ST.modes||{})[ST.mode]||'')+')';
+  if(WTAB==='my'){ renderMy(); return; }
+  box.innerHTML = '<p class="muted">불러오는 중...</p>';
+  try{
+    const j = await api('words', WTAB===0 ? {wrongOnly:true} : {level:parseInt(String(WTAB).slice(1))}, {quiet:true});
+    if(!j.words.length){ box.innerHTML = '<p class="muted">'+(WTAB===0?'틀린 단어가 없어요. 대단해요! 👍':'단어가 없어요')+'</p>'; return; }
+    box.innerHTML = j.words.map(w=>{
+      const st = w.box<0 ? '⬜' : w.box>=ST.rules.learnedBox ? '✅' : '🟨';
+      return `<div class="word"><span class="e">${st}</span><div><div class="en">${esc(w.vi)}</div>${w.ph?`<div class="ph" style="font-size:14px;margin:0">${esc(w.ph)}</div>`:''}<div class="ko">${esc(w.ko)}${w.today?' · <span style="color:var(--bad)">오늘 틀림</span>':w.wrong?' · <span style="color:var(--bad)">틀림 '+w.wrong+'</span>':''}</div></div>
+        <div class="r"><button onclick="say('${jsq(w.vi)}')">🔊</button><button id="st_${w.id.replace(/\W/g,'_')}" onclick="starWord('${jsq(w.id)}', ${w.star?0:1})">${w.star?'⭐':'☆'}</button><button class="pin" style="opacity:${isPinned(w.id)?1:.35}" onclick="togglePin('${jsq(w.id)}', this)">📌</button></div></div>`;
+    }).join('') + '<p class="muted">⬜ 새 단어 · 🟨 학습 중 · ✅ 외움</p>';
+  }catch(e){ box.innerHTML = '<p class="muted">'+esc(e.message)+'</p>'; }
+}
+function starWord(id, on){   // 누르는 즉시 바뀌고, 저장은 뒤에서
+  const b = document.getElementById('st_'+id.replace(/\W/g,'_'));
+  const set = (v)=>{ if(b){ b.textContent = v?'⭐':'☆'; b.setAttribute('onclick', `starWord('${jsq(id)}', ${v?0:1})`); } };
+  set(on); sfx('tap');
+  toast(on ? '⭐ 다음 학습에 먼저 나와요' : '⭐ 를 뺐어요');
+  api('star', {id, on: !!on}, {quiet:true}).catch(e=>{ set(!on); toast('저장 실패: '+e.message); });
+}
+
+/* =============================================================
+ *  📚 부록 [v1.0] — 성조표 · 글자 소리표 · 따라 말하기
+ *  성조 한 줄: [글자, 이름, 소리 설명, 예 낱말, 뜻]
+ *  글자 소리 한 줄: [글자, 비슷한 우리말 소리, 입 모양 설명, '낱말:뜻 낱말:뜻']
+ * ============================================================= */
+const TONES = [
+  ['— 베트남어 성조 6개 (같은 ma 라도 소리 높낮이에 따라 뜻이 달라져요) —'],
+  ['ma',  '① 평성 (ngang)', '부호 없음 · 중간 높이로 평평하게 길게', 'ma', '유령'],
+  ['má',  '② 날카로운 소리 (sắc)', '´ 부호 · 중간에서 위로 쭉 올려요', 'má', '볼(뺨), 엄마(남부)'],
+  ['mà',  '③ 낮은 소리 (huyền)', '` 부호 · 낮은 데서 부드럽게 내려가요', 'mà', '그러나'],
+  ['mả',  '④ 묻는 소리 (hỏi)', '글자 위에 물음표 모양 부호 · 내려갔다가 올라가요', 'mả', '무덤'],
+  ['mã',  '⑤ 꺾이는 소리 (ngã)', '~ 부호 · 목이 살짝 막혔다가 높이 올라가요', 'mã', '말(馬), 코드'],
+  ['mạ',  '⑥ 무거운 소리 (nặng)', '글자 아래 점 부호 · 낮고 짧게 툭 떨어뜨려요', 'mạ', '벼 모종']
+];
+const SOUNDS = [
+  ['— 모음 (우리말에 없는 소리) —'],
+  ['ă', '짧은 "아"', 'a 보다 짧고 빠르게 끊어요', 'ăn:먹다 năm:5, 년'],
+  ['â', '짧은 "어"', '입을 작게 하고 짧게 "어"', 'cân:저울 bận:바쁘다'],
+  ['ê', '"에" (입을 좁게)', 'e 보다 입을 작게 벌려요', 'đêm:밤 tên:이름'],
+  ['ô', '"오"', '입술을 동그랗게', 'tôi:나 ôm:안다'],
+  ['ơ', '"어-" (길게)', '입술을 펴고 길게 "어-"', 'cơm:밥 mơ:꿈꾸다'],
+  ['ư', '"으"', '입술을 옆으로 펴고 "으"', 'thư:편지 chưa:아직'],
+  ['— 자음 —'],
+  ['đ', '"ㄷ"', '혀끝을 윗잇몸에 대고 (d 와 달라요!)', 'đi:가다 đẹp:예쁘다'],
+  ['d', '"z / 이" 비슷', '지역마다 달라요 (북부 z, 남부 y)', 'dễ:쉽다 dạ:네(공손)'],
+  ['b', '"ㅂ (ㅃ)"', '입술을 붙였다 떼며 된소리로', 'bạn:친구 bao:얼마나'],
+  ['t', '"ㄸ"', '숨을 내쉬지 않는 된소리', 'tôi:나 tiền:돈'],
+  ['th', '"ㅌ"', '숨을 세게 내쉬는 ㅌ', 'thích:좋아하다 thịt:고기'],
+  ['ch', '"ㅉ" (약하게)', '혀를 입천장에 살짝', 'chào:인사하다 chợ:시장'],
+  ['tr', '"ㅉ" / "트르"', '지역마다 달라요 (북부는 ch 와 비슷)', 'trà:차 trời:하늘'],
+  ['nh', '"니" ("ㄴ+이")', '혀 중간을 입천장에 붙이고 콧소리', 'nhà:집 nhiều:많다'],
+  ['ng', '"응"', '목 안쪽 콧소리, 낱말 앞에서도 나요', 'ngon:맛있다 người:사람'],
+  ['ngh', '"응" (e, i, ê 앞)', 'ng 와 같은 소리', 'nghe:듣다 nghỉ:쉬다'],
+  ['g / gh', '"ㄱ" (부드럽게)', 'gh 는 e, i, ê 앞에서 써요', 'gà:닭 ghế:의자'],
+  ['gi', '"z / 지"', 'd 와 같은 소리', 'giá:가격 giờ:시간'],
+  ['kh', '"ㅋ" (ㅎ 섞어서)', '목에서 긁는 듯한 ㅋ/ㅎ', 'không:아니다, 없다 khách:손님'],
+  ['ph', '"ㅍ" (f)', '윗니로 아랫입술을 살짝 물고 바람', 'phở:쌀국수 phòng:방'],
+  ['qu', '"꾸"', '"꾸" 처럼 입술을 내밀고 모음으로', 'quán:가게 quá:너무'],
+  ['x', '"ㅆ"', '센 ㅅ 소리', 'xin:청하다 xe:차'],
+  ['s', '"ㅅ" (ㅆ)', '북부에서는 x 와 같은 소리', 'sáu:6 sạch:깨끗하다'],
+  ['r', '"ㄹ" / "z"', '북부는 z, 남부는 혀를 굴려요', 'rẻ:싸다 rau:채소'],
+  ['c / k', '"ㄲ"', 'k 는 e, i, ê 앞에서 써요', 'cơm:밥 kem:아이스크림'],
+  ['v', '"v" ("ㅂ")', '윗니로 아랫입술을 물고 떨림', 'và:그리고 vui:즐겁다'],
+  ['h / l', '"ㅎ" / "ㄹ"', '우리말과 비슷해요', 'hai:2 lạnh:춥다']
+];
+let XTAB = 'tone';
+function xRows(){ return XTAB === 'tone' ? TONES : SOUNDS; }
+function renderExtra(){
+  const tabs = [['tone','🎵 성조표'],['sound','🔤 글자 소리표'],['say','🎤 따라 말하기']];
+  document.getElementById('xTabs').innerHTML = tabs.map(([k,n])=>`<button class="${XTAB===k?'on':''}" onclick="XTAB='${k}';renderExtra()">${n}</button>`).join('');
+  const help = { tone:'같은 글자도 소리 높낮이(성조)로 뜻이 달라져요. 🔊 를 눌러 6개를 차례로 들어 봐요. (성조는 부호로 알 수 있어요)',
+    sound:'글자가 내는 소리예요. 우리말 소리는 비슷할 뿐 정확하지 않을 수 있어요. 🔊 를 눌러 예 낱말을 들어 봐요.',
+    say:'🔊 로 듣고 🎤 를 눌러 따라 말해요. 맞으면 ⭕, 성조만 다르면 🔶, 다르면 ❌ 예요.' };
+  document.getElementById('xHelp').textContent = help[XTAB];
+  const box = document.getElementById('xList');
+  if(XTAB === 'tone'){
+    box.innerHTML = '<div style="margin-bottom:6px"><button class="btn small blue" onclick="sayTones()">🔊 6개 차례로 듣기</button></div>' + xRowsHTML(TONES, false);
+  } else if(XTAB === 'sound'){
+    box.innerHTML = xRowsHTML(SOUNDS, false);
+  } else {
+    box.innerHTML = xRowsHTML(TONES, true) + xRowsHTML(SOUNDS, true, true);
+  }
+}
+function sayTones(){
+  let k = 0; const ws = TONES.filter(r=>r.length>1).map(r=>r[3]);
+  const next = ()=>{ if(k >= ws.length) return; try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(ws[k++]); u.lang = SPEECH_LANG; u.rate = Math.min(speechRate(), 0.8); if(viVoice) u.voice = viVoice; u.onend = ()=>setTimeout(next, 350); u.onerror = ()=>{}; speechSynthesis.speak(u); }catch(e){} };
+  next();
+}
+let XK = 0;
+function xRowsHTML(rows, withMic, skipHead){
+  return rows.map(r=>{
+    if(r.length === 1) return withMic && skipHead ? '' : (withMic ? '' : `<div class="muted" style="margin:10px 0 2px;font-weight:700">${esc(r[0])}</div>`);
+    const isTone = rows === TONES;
+    const words = isTone ? [[r[3], r[4]]] : r[3].split(' ').map(x=>x.split(':'));
+    return words.map((wm,wi)=>{
+      const id = 'x'+(XK++), w = wm[0], mean = wm[1] || '';
+      const head = wi===0 ? `<div class="g">${esc(r[0])}</div>` : `<div class="g"></div>`;
+      const desc = wi===0 ? `<div>${isTone?'<b>'+esc(r[1])+'</b>':esc(r[1])}${r[2]?' · <span class="muted">'+esc(r[2])+'</span>':''}</div>` : '';
+      const mic = withMic && recogOK() ? `<button onclick="xSpeak('${jsq(w)}','${id}', this)">🎤</button>` : '';
+      return `<div class="xrow">${head}<div class="m">${desc}<div class="ex">${esc(w)} <span class="muted" style="font-weight:400">${esc(mean)}</span></div><div class="res" id="${id}"></div></div>
+        <div class="b"><button onclick="say('${jsq(w)}')">🔊</button>${mic}</div></div>`;
+    }).join('');
+  }).join('');
+}
+/* 🎤 따라 말하기 */
+function xSpeak(word, id, btn){
+  const box = document.getElementById(id);
+  if(!recogOK()){ box.innerHTML = '<span style="color:var(--bad)">이 브라우저는 음성 인식이 안 돼요</span>'; return; }
+  box.textContent = '듣는 중… 말해 보세요';
+  listen(btn, (heard, err)=>{
+    if(!heard.length){ box.innerHTML = '<span style="color:var(--bad)">잘 안 들렸어요'+(err?' ('+esc(REC_ERR[err]||err)+')':'')+'</span>'; return; }
+    const m = heardMatch(heard, word);
+    box.innerHTML = (m==='exact' ? '<b style="color:var(--ok)">⭕ 잘했어요!</b>' : m==='tone' ? '<b style="color:#d48806">🔶 '+TONE_NOTE+'</b>' : m==='close' ? '<b style="color:#d48806">🔶 거의 맞았어요</b>' : '<b style="color:var(--bad)">❌ 다시 해 봐요</b>') + ' <span class="muted">(들린 말: '+esc(heard[0])+')</span>';
+    sfx(m ? 'ok' : 'bad');
+    dlog('extra-say', {word, heard: heard.join(' | '), match: m || 'no'});
+  }, (live)=>{ box.textContent = '들리는 말: ' + live; });
+}
+
+/* =============================================================
+ *  📌 내 단어장
+ * ============================================================= */
+function myState(){ return (ST && ST.my) || {words:[], pins:[], max:150}; }
+function isPinned(id){ return myState().pins.indexOf(id) >= 0; }
+function setMy(my){
+  ST.my = my;
+  (my.words||[]).forEach(w=>{ WMAP[w.id] = Object.assign({lv:'m'}, w); });
+}
+async function togglePin(id, btn){
+  const on = !isPinned(id);
+  try{ const j = await api('myPin', {id, on}, {quiet:true}); setMy(j.my); sfx('tap');
+    toast(on ? '📌 내 단어장에 넣었어요' : '내 단어장에서 뺐어요');
+    if(btn){ if(btn.classList.contains('pin')) btn.style.opacity = on ? 1 : .35; else btn.textContent = on ? '📌 내 단어장에서 빼기' : '📌 내 단어장에 넣기'; }
+  }catch(e){ toast(e.message); }
+}
+let MY_EDIT = null;
+function myFormHTML(w){
+  w = w || {};
+  return `<div class="myform"><b>${MY_EDIT?'✏️ 고치기':'✏️ 직접 추가'}</b>
+    <div class="row" style="margin-top:6px"><input id="myVi" placeholder="베트남어 또는 한글 (예: Xin chào, 안녕)" value="${esc(w.vi||'')}"><button class="btn small blue" style="flex:0 0 86px;margin:0" onclick="myLookup()">🔍 찾기</button></div>
+    <input id="myKo" placeholder="뜻 (예: 안녕하세요)" value="${esc(w.ko||'')}">
+    <input id="myPh" placeholder="한글 발음 (비워 두거나 직접 적어요, 예: 씬 짜오)" value="${esc(w.ph||'')}">
+    <p class="muted" id="myMsg">🔍 찾기를 누르면 인터넷 번역으로 뜻(또는 베트남어)을 채워 줘요. 한글 발음은 직접 적어요. 번역이 이상하면 고쳐서 저장하세요.</p>
+    <div class="row"><button class="btn small gray" onclick="MY_EDIT=null;renderMy()">${MY_EDIT?'취소':'지우기'}</button><button class="btn small" onclick="mySave()">💾 저장</button></div>
+    ${MY_EDIT?'':`<details style="margin-top:8px"><summary class="muted">📋 여러 개 한 번에 붙여 넣기</summary>
+      <textarea id="myBulk" placeholder="한 줄에 하나씩: 베트남어|뜻|한글 발음
+Xin chào|안녕하세요|씬 짜오
+Cảm ơn|감사합니다"></textarea>
+      <button class="btn small" onclick="myBulkSave()">💾 모두 저장</button></details>`}</div>`;
+}
+function renderMy(){
+  const my = myState(), box = document.getElementById('wordList');
+  const pinned = my.pins.map(id=>WMAP[id]).filter(Boolean);
+  const all = my.words.length + pinned.length;
+  const row = (w, custom) => {
+    const st = w.box==null||w.box<0 ? '⬜' : w.box>=3 ? '✅' : '🟨';
+    return `<div class="word"><span class="e">${custom?st:'📌'}</span><div><div class="en">${esc(w.vi)}</div>${w.ph?`<div class="ph" style="font-size:14px;margin:0">${esc(w.ph)}</div>`:''}<div class="ko">${esc(w.ko)}${custom?'':' · <span class="muted">앱 단어</span>'}</div></div>
+      <div class="r"><button onclick="say('${jsq(w.vi)}')">🔊</button>${custom?`<button onclick="myEditStart('${jsq(w.id)}')">✏️</button>`:''}<button onclick="${custom?`myDel('${jsq(w.id)}')`:`togglePin('${jsq(w.id)}');setTimeout(renderMy,600)`}">🗑</button></div></div>`;
+  };
+  box.innerHTML = myFormHTML(MY_EDIT ? my.words.find(w=>w.id===MY_EDIT) : null) +
+    `<div class="row" style="margin:12px 0 4px"><button class="btn small" ${all?'':'disabled'} onclick="startMyStudy()">📌 내 단어장 복습 (${all})</button><button class="btn small blue" ${all>=GAME_MIN_WORDS?'':'disabled'} onclick="startGame('my')">🎮 게임</button></div>
+    <p class="muted">직접 넣은 단어 ${my.words.length} / ${my.max} · 담은 앱 단어 ${pinned.length}</p>` +
+    (all ? my.words.map(w=>row(w, true)).join('') + pinned.map(w=>row(w, false)).join('') : '<p class="muted">아직 없어요. 위에서 넣거나, 공부하다가 📌 를 눌러 담아요.</p>');
+}
+function myEditStart(id){ MY_EDIT = id; renderMy(); window.scrollTo(0,0); }
+async function myLookup(){
+  const q = document.getElementById('myVi').value.trim();
+  const msg = document.getElementById('myMsg');
+  if(!q){ toast('베트남어나 한글을 먼저 써 주세요'); return; }
+  msg.textContent = '🔍 찾는 중…';
+  try{
+    const j = await api('myLookup', {q});
+    if(j.fromKo){ document.getElementById('myVi').value = j.vi; document.getElementById('myKo').value = j.fromKo; }   // 한글 → 베트남어
+    else if(j.ko && !document.getElementById('myKo').value.trim()) document.getElementById('myKo').value = j.ko;
+    msg.textContent = (j.fromKo ? '🔁 "'+j.fromKo+'" → '+j.vi+' (번역). ' : '✅ 번역했어요. ') + '한글 발음은 직접 적어 주세요. 맞게 고친 다음 💾 저장하세요.';
+  }catch(e){ msg.textContent = '못 찾았어요: ' + e.message; }
+}
+async function mySave(){
+  const v = (id)=>document.getElementById(id).value.trim();
+  const w = {vi:v('myVi'), ko:v('myKo'), ph:v('myPh')};
+  if(!w.vi || !w.ko){ toast('베트남어와 뜻은 꼭 써 주세요'); return; }
+  try{
+    const j = MY_EDIT ? await api('myEdit', Object.assign({id:MY_EDIT}, w)) : await api('myAdd', {items:[w]});
+    setMy(j.my);
+    if(!MY_EDIT && !j.added){ toast('저장 안 됨: '+esc((j.skipped||[]).join(', '))); return; }
+    MY_EDIT = null; toast('💾 저장했어요'); renderMy();
+  }catch(e){ toast(e.message); }
+}
+async function myBulkSave(){
+  const items = document.getElementById('myBulk').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{ const a = l.split('|').map(x=>x.trim()); return {vi:a[0], ko:a[1], ph:a[2]}; });
+  if(!items.length){ toast('붙여 넣은 내용이 없어요'); return; }
+  try{ const j = await api('myAdd', {items}); setMy(j.my); toast('💾 '+j.added+'개 저장'+(j.skipped.length?' · 건너뜀 '+j.skipped.length+'개':'')); renderMy(); }
+  catch(e){ toast(e.message); }
+}
+function myDel(id){
+  modal(`<h2>지울까요?</h2><p class="muted">${esc((WMAP[id]||{}).vi||'')} 를 내 단어장에서 지워요.</p><div class="row"><button class="btn gray" onclick="closeModal()">취소</button><button class="btn" onclick="closeModal();myDelGo('${jsq(id)}')">지우기</button></div>`);
+}
+async function myDelGo(id){ try{ const j = await api('myDel', {id}); setMy(j.my); renderMy(); }catch(e){ toast(e.message); } }
+async function startMyStudy(){
+  try{
+    const j = await api('myStudy', {});
+    if(!j.questions.length){ toast(j.msg || '내 단어장이 비어 있어요'); return; }
+    startQuiz('study', j.questions);
+  }catch(e){ toast(e.message); }
+}
+
+/* =============================================================
+ *  🎮 망고 게임 (오늘 공부한 단어)
+ * ============================================================= */
+function todayWordObjs(){ return (ST.todayWords||[]).map(id=>WMAP[id]).filter(Boolean); }
+function renderGameTab(){
+  const ws = todayWordObjs();
+  document.getElementById('gameInfo').textContent = ws.length >= GAME_MIN_WORDS ? '오늘 공부한 단어 '+ws.length+'개로 게임해요' : '먼저 공부 탭에서 학습하고 오세요! (오늘 공부한 단어 '+ws.length+'개)';
+  document.getElementById('gameBtn').disabled = ws.length < GAME_MIN_WORDS;
+}
+let G = null;
+function startGame(src){
+  const my = myState();
+  const words = src === 'my' ? my.words.map(w=>WMAP[w.id]).concat(my.pins.map(id=>WMAP[id])).filter(Boolean) : todayWordObjs();
+  if(words.length < GAME_MIN_WORDS){ toast('단어가 '+GAME_MIN_WORDS+'개 이상 있어야 해요'); return; }
+  const wrongIds = ST.todayWrong || [];   // 오늘 틀린 단어는 GAME_WRONG_WEIGHT배 자주
+  const pool = [].concat(...words.map(w=>Array(wrongIds.indexOf(w.id)>=0 ? GAME_WRONG_WEIGHT : 1).fill(w)));
+  let q = [];
+  while(q.length < GAME_ROUND) q = q.concat(shuffle(pool.slice()));
+  q = q.slice(0, GAME_ROUND);
+  for(let k=1;k<q.length;k++) if(q[k].id===q[k-1].id){ const j = q.findIndex((x,m)=>m>k && x.id!==q[k].id && (!q[m-1] || q[m-1].id!==x.id)); if(j>0){ const t=q[k]; q[k]=q[j]; q[j]=t; } }
+  G = {q, words, miss:[], i:-1, lives:LIVES, score:0, combo:0, correct:0, fall:FALL_START_SEC, mango:null, busy:false, raf:0};
+  document.getElementById('gMic').style.display = recogOK() ? '' : 'none';
+  document.getElementById('gNote').textContent = recogOK() ? '' : '이 브라우저는 마이크 인식이 안 돼요. 버튼으로 해요.';
+  go('game'); refreshSpeedUI(); gNext();
+}
+function gHud(){
+  document.getElementById('hudLife').textContent = '❤️'.repeat(Math.max(0,G.lives)) + '🤍'.repeat(LIVES-Math.max(0,G.lives));
+  document.getElementById('hudProg').textContent = Math.min(G.i+1, G.q.length)+'/'+G.q.length + (G.combo>1?' 🔥'+G.combo:'');
+  document.getElementById('hudScore').textContent = G.score+'점';
+}
+function gNext(){
+  stopMic();
+  G.i++; G.busy=false;
+  if(G.i >= G.q.length || G.lives<=0){ gEnd(); return; }
+  const w = G.q[G.i]; G.word = w;
+  const field = document.getElementById('field');
+  field.innerHTML = '';
+  const a = document.createElement('div'); a.className='mango';
+  a.innerHTML = `<div class="fruit">🥭</div><div class="tag">${esc(w.ko)}</div>`;
+  a.style.left = (22 + Math.random()*56)+'%';
+  field.appendChild(a); G.mango = a;
+  let wrong = shuffle(G.words.filter(x=>x.vi!==w.vi).map(x=>x.vi)).slice(0,2);
+  if(wrong.length < 2){   // 단어가 모자라면 같은 편의 다른 단어에서 채움
+    const more = shuffle(Object.keys(WMAP).map(k=>WMAP[k]).filter(x=>x.vi!==w.vi && wrong.indexOf(x.vi)<0 && (x.pack===w.pack || !w.pack)).map(x=>x.vi));
+    wrong = wrong.concat(more).slice(0,2);
+  }
+  const ch = shuffle([w.vi].concat(wrong));
+  document.getElementById('gChoices').innerHTML = ch.map(c=>`<button onclick="gPick(this,'${jsq(c)}')">${esc(c)}</button>`).join('');
+  gHud();
+  G.t0 = performance.now(); G.dur = G.fall*1000;
+  cancelAnimationFrame(G.raf);
+  const loop = (t)=>{
+    if(!G || G.busy) return;
+    const p = Math.min(1, (t - G.t0)/G.dur);
+    a.style.transform = `translateY(${p*(field.clientHeight - 90)}px)`;
+    if(p>=1){ gMiss('땅에 떨어졌어요'); return; }
+    G.raf = requestAnimationFrame(loop);
+  };
+  G.raf = requestAnimationFrame(loop);
+}
+function gFlash(txt, color){ const f = document.getElementById('gFlash'); f.textContent = txt; f.style.color = color; clearTimeout(f._h); f._h = setTimeout(()=>f.textContent='', 900); }
+function gPick(btn, word){ if(!G || G.busy) return; if(word === G.word.vi) gGood(btn); else { btn.classList.add('shake'); gMiss('정답: '+G.word.vi); } }
+function gGood(btn){
+  G.busy = true; lastAnswerAt = Date.now();
+  G.correct++; G.combo++;
+  const pts = Math.round(10*(1+Math.min(G.combo,10)*0.1));
+  G.score += pts; G.fall = Math.max(FALL_MIN_SEC, G.fall - FALL_STEP_SEC);
+  if(btn) btn.style.background = '#c9f2d6';
+  G.mango.classList.add('pop'); G.mango.style.transform += ' scale(1.6)';
+  gFlash('+'+pts+(G.combo>2?' 🔥'+G.combo:''), '#22b35e'); say(G.word.vi); gHud();
+  setTimeout(gNext, 700);
+}
+function gMiss(msg){
+  G.busy = true; lastAnswerAt = Date.now();
+  G.lives--; G.combo = 0; G.fall = Math.min(FALL_START_SEC, G.fall + 0.6);
+  if(G.miss.indexOf(G.word.id) < 0) G.miss.push(G.word.id);
+  const gm = document.getElementById('game'); gm.classList.add('shake'); setTimeout(()=>gm.classList.remove('shake'), 400);
+  gFlash('💥 '+msg, '#ff5a5f'); say(G.word.vi); gHud();
+  setTimeout(gNext, 1300);
+}
+function gHint(){ if(G && !G.busy) say(G.word.vi); }
+function gMicTap(){
+  if(!G || G.busy) return;
+  const idx = G.i, btn = document.getElementById('gMic');
+  listen(btn, (heard)=>{
+    if(!G || G.i!==idx || G.busy) return;
+    if(!heard.length) return;
+    if(heardMatch(heard, G.word.vi)) gGood(null);
+    else toast('🎤 다시 말해 봐요 (들린 말: '+esc(heard[0])+')');   // 마이크는 틀려도 목숨 안 깎아요
+  });
+}
+function quitGame(){
+  modal(`<h2>그만할까요?</h2><div class="row"><button class="btn gray" onclick="closeModal()">계속하기</button><button class="btn" onclick="closeModal();G.busy=true;stopMic();G=null;enterMain();showTab('tabGame')">그만하기</button></div>`);
+}
+function gEnd(){
+  const g = G; G = null; stopMic();
+  const real = g.miss.filter(id=>/\./.test(id));
+  if(real.length) api('gameResult', {miss: real}, {quiet:true}).then(j=>{ if(j.stars) ST.stars = j.stars; }).catch(()=>{});   // 게임에서 틀린 단어 ⭐
+  enterMain(); showTab('tabGame');
+  modal(`<div style="font-size:60px">${g.lives>0?'🏅':'🥭'}</div><h2>${g.lives>0?'잘했어요!':'아쉬워요!'}</h2><p>${g.correct}/${g.q.length} 정답 · ${g.score}점</p>
+    ${g.miss.length?`<p class="muted">틀린 단어 ⭐: ${esc(g.miss.map(id=>(WMAP[id]||{}).vi).join(', '))}<br>다음 공부 때 먼저 나와요</p>`:''}
+    <div class="row"><button class="btn gray" onclick="closeModal()">닫기</button><button class="btn" onclick="closeModal();startGame()">한 판 더</button></div>`);
+}
+
+/* ---------- 시작! ---------- */
+boot();
+</script>
+</body>
+</html>
