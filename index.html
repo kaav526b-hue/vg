@@ -303,6 +303,7 @@ textarea{font:inherit;width:100%;padding:10px;border:1px solid #e6d2a8;border-ra
 <script>
 /***************************************************************
  * 벳공도전_hj 앱 화면 — 혼자 쓰는 베트남어 회화 공부 (영공도전_jw v2.9 화면을 바탕으로 만듦)
+ * VERSION 2.0   [v2.0] ☑️ 골라 섞기 모드: 설정의 편 고르는 곳에 단추, 누르면 편마다 체크 칸 + 저장 (2개 이상 = 골라 섞기, 1개 = 그 편, 0개 = 안내). 서버 v1.2 필요
  * VERSION 1.9   [v1.9] 네이버 앱 안 창도 '🔇 소리가 안 나요' 안내, 버튼은 '🌐 삼성 인터넷으로 열기', '그냥 쓸게요'를 누른 기계는 다시 안 물음
  * VERSION 1.8   [v1.8] 🧱 문장 만들기편 (시제 바꾸기·붙여 늘리기): 늘린 문장 문제에 '앞 문장 + ➕ 붙일 말' 칸, 💡 이럴 때 써요 54개 추가 (서버 v1.1·Data v1.2와 같이 배포)
  * VERSION 1.7   [v1.7] 오답이면 '🙋 내가 고른 ○○ → 원래 말(발음) 🔊 + 💡 이럴 때 써요', 정답 설명에도 💡 이럴 때 써요 (말 378개 설명)
@@ -324,7 +325,7 @@ textarea{font:inherit;width:100%;padding:10px;border:1px solid #e6d2a8;border-ra
  ***************************************************************/
 
 // ===================== 조절할 값 =====================
-const VERSION = '1.9';            // 앱 화면 버전 [v1.9]
+const VERSION = '2.0';            // 앱 화면 버전 [v2.0]
 const WV_SILENT_UA = /NAVER\(inapp/i;   // [v1.9] 소리가 안 나는 앱 안 창 알아보는 글자 (네이버 앱). 고래(Whale) 브라우저는 소리 잘 나서 안 넣음
 const SPEECH_LANG = 'vi-VN';      // [v1.0] 읽어 주기·음성인식 언어
 const PCT_TOAST_MS = 1600;        // 답할 때 진행률 ▲▼ 보여 주는 시간(ms)
@@ -807,12 +808,30 @@ function studyScope(lv, st){ setFocus(lv, st); startStudy(false); }
 function openSettings(){
   modal(`<h2>⚙️ 설정</h2>
     <p class="muted">공부할 편 (서버에 저장돼요)</p>
-    <div class="row" style="flex-wrap:wrap">${Object.keys(ST.modes||{}).map(m=>`<button class="btn small ${m===ST.mode?'':'gray'}" style="flex:1 1 45%" onclick="setMode('${m}')">${esc(ST.modes[m])}</button>`).join('')}</div>
+    <div class="row" style="flex-wrap:wrap">${Object.keys(ST.modes||{}).filter(m=>m!=='pick').map(m=>`<button class="btn small ${m===ST.mode?'':'gray'}" style="flex:1 1 45%" onclick="setMode('${m}')">${esc(ST.modes[m])}</button>`).join('')}<button class="btn small ${ST.mode==='pick'?'':'gray'}" style="flex:1 1 45%" onclick="openPick()">☑️ 골라 섞기</button></div>
     <p class="muted">하루 공부량 (문제 수)</p>
     <div class="row" style="flex-wrap:wrap">${ST.goalChoices.map(g=>`<button class="btn small ${g===ST.goal?'':'gray'}" style="flex:1 1 20%" onclick="setGoal(${g})">${g}</button>`).join('')}</div>
     <button class="btn gray small" onclick="closeModal();openCheck()">🩺 점검 (소리·마이크 문제 찾기)</button>
     <button class="btn" onclick="closeModal()">닫기</button>
     <p class="muted">앱 v${VERSION} · 서버 v${esc(ST.version)}</p>`);
+}
+/* [v2.0] ☑️ 골라 섞기: 편마다 체크 칸 → 저장 (2개 이상 = 골라 섞기, 1개 = 그 편 하나, 0개 = 저장 안 됨) */
+function pickPacks(){ return Object.keys(ST.modes||{}).filter(m=>m!=='pick' && m!=='mix'); }
+function openPick(){
+  const cur = ST.picks || [];
+  modal(`<h2>☑️ 골라 섞기</h2>
+    <p class="muted">섞어서 공부할 편을 고르세요 (2개 이상이면 골고루 섞여 나와요)</p>
+    <div id="pickBox">${pickPacks().map(m=>`<label style="display:flex;align-items:center;gap:10px;padding:10px 4px;font-size:17px"><input type="checkbox" class="pk" value="${m}" ${cur.indexOf(m)>=0?'checked':''} style="width:24px;height:24px;margin:0">${esc(ST.modes[m])}</label>`).join('')}</div>
+    <p class="muted" id="pickMsg"></p>
+    <button class="btn" onclick="savePick()">저장</button>
+    <button class="btn gray" onclick="closeModal()">닫기</button>`);
+}
+async function savePick(){
+  const ks = [...document.querySelectorAll('#pickBox .pk:checked')].map(x=>x.value);
+  if(!ks.length){ document.getElementById('pickMsg').textContent = '편을 하나 이상 골라 주세요'; return; }
+  closeModal();
+  try{ const j = await api('setMode', {mode:'pick', picks:ks}); ST = Object.assign(ST, j); setFocus(0, -1); WTAB = 0; showTab('tabStudy'); toast('공부 편: '+esc((ST.modes||{})[ST.mode]||'')); }
+  catch(e){ toast('저장 실패: '+e.message); }
 }
 function setGoal(g){   // 누르는 즉시 바뀌고, 저장은 뒤에서
   const old = ST.goal;
@@ -822,7 +841,7 @@ function setGoal(g){   // 누르는 즉시 바뀌고, 저장은 뒤에서
 }
 async function setMode(m){
   closeModal();
-  try{ const j = await api('setMode', {mode:m}); ST = Object.assign(ST, j); setFocus(0, -1); WTAB = 0; showTab('tabStudy'); toast('공부 편: '+esc(ST.modes[m])); }
+  try{ const j = await api('setMode', {mode:m}); ST = Object.assign(ST, j); setFocus(0, -1); WTAB = 0; showTab('tabStudy'); toast('공부 편: '+esc((ST.modes||{})[ST.mode]||'')); }
   catch(e){ toast('저장 실패: '+e.message); }
 }
 
